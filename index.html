@@ -663,7 +663,7 @@
             //show City
             function showCity(cities, whmap, pos, color)
 			{		
-console.log(pos[0][0])				
+//console.log(pos[0][0])				
 				/* Define the data for the circles */
 				var elem = whmap.selectAll("circle")
 								.data(cities)
@@ -673,7 +673,7 @@ console.log(pos[0][0])
 					.append("g")
 					.attr("transform", function(d,i)
 					{
-console.log(pos[i][0]+","+pos[i][1])	
+//console.log(pos[i][0]+","+pos[i][1])	
 						return "translate("+pos[i][0]+","+pos[i][1]+" )"
 					})			
 				/*Create the circle for each block */
@@ -1269,15 +1269,15 @@ var posit = [];
 					json.features[i].properties.longitude = (translate[0]-centroid_value[0]-(jww/2));
 					json.features[i].properties.latitude = (translate[1]-centroid_value[1]-(jwh/2));
 //console.log((translate[0]-centroid_value[0]-(jww/2))+","+(translate[1]-centroid_value[1]-(jwh/2)))
-posit[i][0] = (translate[0]-centroid_value[0]-(jww/2));
-posit[i][1] = (translate[1]-centroid_value[1]-(jwh/2));
+//posit[i][0] = (translate[0]-centroid_value[0]-(jww/2));
+//posit[i][1] = (translate[1]-centroid_value[1]-(jwh/2));
 					if (json.features[i].properties.KABKOT == "JAKARTA UTARA")
 					{
 					
 					}	 
 				}
 //console.log(posit)				
-				showCity (json, circles2, posit , "brown")		
+				//showCity (json, circles2, posit , "brown")		
 				//districtextraction(json, positions2, projection2, circles2, "orange");
 				javjson = json;  
              	updateMapJAVA(json);
