@@ -102,13 +102,34 @@
 			.background {
 			  fill: none;
 			  pointer-events: all;
+			  stroke: #000;
+			  stroke-width : 2;
 			}
 			
-			table, td, th {
-				padding: 1px 8px;
-				border: 1px solid black;
-				font-size: 14px;
-			  	font-family: "Sawasdee", "URW Gothic L", sans;
+			.tblinfo {
+				font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+				width: 100%;
+				border-collapse: collapse;
+			}
+
+			.tblinfo td, .tblinfo th {
+				font-size: 1em;
+				border: 1px solid #98bf21;
+				padding: 3px 7px 2px 7px;
+			}
+
+			.tblinfo th {
+				font-size: 1.1em;
+				text-align: left;
+				padding-top: 5px;
+				padding-bottom: 4px;
+				background-color: #A7C942;
+				color: #ffffff;
+			}
+
+			.tblinfo tr.alt td {
+				color: #000000;
+				background-color: #EAF2D3;
 			}
 			
         </style>
@@ -152,16 +173,16 @@
 				clistw = 250,
 				clisth = 300,
 				jktx = 400,
-				jktw = 600,
-				jkth = 340,
-				jww = 1000,
-				jwh = 350,
+				jktw = width/2,
+				jkth = height/3,
+				jww = width-15*margin,
+				jwh = height-jkth-5*margin,
 				clist = canvas.append("svg:g")
 					.attr("width", clistw),
 				label = canvas.append("svg:g")
 					.attr("transform", "translate("+clistw+",0)"),
 				map = canvas.append("svg:svg")
-					.attr("x", jktx)
+					.attr("x", width-jktw-15*margin)
 					.attr("width", jktw)
 					.attr("height", jkth)
 					.append("svg:g"),
@@ -170,14 +191,14 @@
 					.attr("y", jkth)
 					.attr("width", jww)
 					.attr("height", jwh)
-					.append("svg:g")
+					.append("svg:g"),
 					
 
             //Width and height for jabodetabek
             	
-            var projection = d3.geo.mercator()
-                               .rotate([-105.5,5.85,0])
-    						   .scale(9500*2)
+            	projection = d3.geo.mercator()
+                               .rotate([-105.55,5.85,0])
+    						   .scale(width*11)
                                .translate([0, 0]),                 
             	path = d3.geo.path().projection(projection),
             	
@@ -196,10 +217,11 @@
 					.attr("height", jkth);
             
             //Width and height for java island
-           
+//console.log(width) 
+//console.log(height)     
             var projection2 = d3.geo.mercator()
                                 .rotate([-105,5.85,0])
-    							.scale(6000)
+    							.scale(width*4)
                                 .translate([0, 0]),                  
             	path2 = d3.geo.path().projection(projection2),
             
@@ -223,18 +245,18 @@
 				unique_areatarget = [],
 				datamovjav = [],
 				datamovjak = [],
-			
-				circles = map
-				.attr("id", "circles"),
-				
-				circles2 = map2
-				.attr("id", "circles2"),
-				
+				circles = map.attr("id", "circles"),
+				circles2 = map2.attr("id", "circles2"),
 				linksByOrigin = {},
 				countByCity = {},
 				locationByCity = {},
 				positions = [],
 				positions2 = [];	
+				
+			var ddm1value = "",//species
+				ddm2value = "",//type
+				ddm3value = "",//type_movement
+				ddm4value = "";//movement_into
 			
             var setNormalColor = function(d)
             {
@@ -420,7 +442,9 @@
 			}
 			
 			//global variable to store data movement csv
-			var data = function()
+			var data = [],
+				datadump = [];
+			function getcsvdata()
 			{
 				//Get data from CSV file
 				//The d3.csv() function does both the loading and the parsing without giving you a chance to intervene so we need to do this
@@ -429,10 +453,10 @@
 					// to delete the first row and get the header
 					var dirtyCSV = response.responseText;
 					var cleanCSV = dirtyCSV.split('\n').slice(1).join('\n');
-					return d3.csv.parse(cleanCSV); 
+					data = d3.csv.parse(cleanCSV); 
 				})
 			}
-			
+		
 			function updateMapJKT(js) 
 			{
 				if(map.selectAll("path").empty()) {
@@ -500,7 +524,7 @@
 								d3.select("#tooltip").classed("hidden", false);
 								
 								//generate table info
-								var JavTable = tabulate(datamovjak, ["district_org_source", "CY_district",  "tot"]);
+								var JavTable = tabulate(datamovjak, ["species","district_org_source",  "tot"]);
 								
 										})
 						.on("mouseout", function(d){
@@ -598,7 +622,7 @@
 								d3.select("#tooltip").classed("hidden", false);
 								
 								//generate table info
-								var JavTable = tabulate(datamovjav, ["district_org_source", "CY_district", "tot"]);
+								var JavTable = tabulate(datamovjav, ["species", "CY_district", "tot"]);
 
 							})
                     	.on("mouseout", function(d){
@@ -935,12 +959,13 @@
 			{
 	//console.log(data)
 				var table = clist.append("foreignObject")
-					.attr("x", 0)
+					.attr("x", width - 4*margin -250)
 					.attr("y", 0)
 					.attr("width", 250)
-					.attr("height",jktw)
+					.attr("height",height-5*margin)
 				.append("xhtml:body")
 						.append("table")
+						.attr("class", "tblinfo")
 						.attr("style", "margin-left: 0px"),
 					thead = table.append("thead"),
 					tbody = table.append("tbody");
@@ -957,6 +982,7 @@
 							if (column == "CY_district"){column = "Area Destination"}
 							if (column == "district_org_source"){column = "Area Origin"}
 							if (column == "tot"){column = "Total Weekly Volume"}
+							if (column == "species"){column = "Bird Species"}
 						
 							return column; 
 						});
@@ -1040,52 +1066,76 @@
 			//load dropdown menu for filter
 			function dropdownmenu1()
 			{
-				var dispatch = d3.dispatch("load", "countrychange");
+				var dispatch = d3.dispatch("load", "specieschange");
 
 				d3.xhr('Movement.csv').get(function (err, response) 
 				{
-				  //if (error) throw error;
-				  var dirtyCSV = response.responseText;
-				  var cleanCSV = dirtyCSV.split('\n').slice(1).join('\n');
-				  data = d3.csv.parse(cleanCSV);
-				  var countryById = d3.map();
-				  data.forEach(function (d) 
-				  { 
-					countryById.set(d.species, d); 
-				  });
-				  dispatch.load(countryById);
-				  //dispatch.countrychange(countryById.get("PH"));
-			  
+					//if (error) throw error;
+					//var dirtyCSV = response.responseText;
+					//var cleanCSV = dirtyCSV.split('\n').slice(1).join('\n');
+					//data = d3.csv.parse(cleanCSV);
+//console.log(data)
+					var speciesById = d3.map();
+					data.forEach(function (d) 
+					{ 
+						speciesById.set(d.species, d); 
+					});
+					dispatch.load(speciesById);
+					dispatch.specieschange(speciesById.get("ALL"));
+
 				});
 								
-				dispatch.on("load.menu", function(countryById) {
-				  var select = svg.append("foreignObject")
-				  	.attr("x", 1.5*margin)
-					.attr("y", 2*margin)
-					.attr("width", 500)
-					.attr("height",30)
-					.append("xhtml:body")
-					.append("div")
-					.text("Filter by SPECIES : ")
-					.append("select")
-					.on("change", function () { dispatch.countrychange(countryById.get(this.value)); });
+				dispatch.on("load.menu", function(speciesById) 
+				{
+					var select = svg.append("foreignObject")
+							.attr("x", 1.5*margin)
+							.attr("y", 2*margin)
+							.attr("width", 500)
+							.attr("height",30)
+							.append("xhtml:body")
+							.append("div")
+							.text("Filter by SPECIES : ")
+							.append("select")
+							.on("change", function () 
+							{ 
+								dispatch.specieschange(speciesById.get(this.value)); 
+							});
 
-				  select.selectAll("option")
-					.data(countryById.values())
-					.enter().append("option")
-					.attr("value", function (d) { return d.species; })
-					.text(function (d) { return d.species; });
+					
+							
+					select.selectAll("option")
+							.data(speciesById.values())
+							.enter()
+							.append("option")
+							.attr("value", function (d) { return d.species; })
+							.text(function (d) 
+							{ 
+								return d.species; 
+							});
+							
+					select.append("option")
+							.attr("value", "ALL")
+							.text("ALL");
 
-				  dispatch.on("countrychange.menu", function (country) {
-					  select.property("value", country)
-					  //loading the value based on the selected data
-					  var svg1 = d3.select("body").append("svg1")
+					dispatch.on("specieschange.menu", function (spec) 
+					{
+						select.property("value", spec)
+						//loading the value based on the selected data
+						/*var svg1 = d3.select("body").append("svg1")
 							.attr("width", width)
-							.attr("height", height)
-					  //end of selection
+							.attr("height", height)*/
+						//end of selection
+						ddm1value = "ALL";
+						if (typeof spec != 'undefined')
+						{
+							ddm1value = spec.species;
+						}
+						// set new csv data based on filter from dropdownmenu1 value(ddm1value)
+						datafilter(ddm1value,ddm2value,ddm3value,ddm4value);
+				
+						
 
-//console.log(country);
-				  });
+					});
 				});
 				//end of drop down
 			}
@@ -1097,9 +1147,9 @@
 				d3.xhr('Movement.csv').get(function (err, response) 
 				{
 				  //if (error) throw error;
-				  var dirtyCSV = response.responseText;
-				  var cleanCSV = dirtyCSV.split('\n').slice(1).join('\n');
-				  data = d3.csv.parse(cleanCSV);
+				  //var dirtyCSV = response.responseText;
+				  //var cleanCSV = dirtyCSV.split('\n').slice(1).join('\n');
+				  //data = d3.csv.parse(cleanCSV);
 				  var countryById = d3.map();
 				  data.forEach(function (d) 
 				  { 
@@ -1136,13 +1186,51 @@
 							.attr("height", height)
 					  //end of selection
 
-//console.log(country);
+console.log(country);
 				  });
 				});
 				//end of drop down
 			}
+			
+			//function filter for species
+			function datafilter(species, type, type_movement, movement_into)
+			{	
+				//reset data variable into original data
+				data = datadump;
+
+				if (species != "ALL")
+				{
+					//filter data with new variable 
+					var datafilter = data.filter(function(dat) 
+						{
+							return dat.species == species
+						});
+					data = datafilter;
+				}
+			}
+			
+			function datdum()
+			{
+				d3.xhr('Movement.csv').get(function (err, response) 
+				{
+					//if (error) throw error;
+					var dirtyCSV = response.responseText;
+					var cleanCSV = dirtyCSV.split('\n').slice(1).join('\n');
+					datadump = d3.csv.parse(cleanCSV);
+
+				});
+			}
+
             
+/****************************************************************************************/
             //set the interface
+            
+            //get data from the movement csv
+            getcsvdata();
+            //keep original data to other variable 
+            datdum();
+
+            
             //added  title for the interface
             titleinterface()
             
@@ -1151,11 +1239,11 @@
             
             //added dropdownmenu for filter based on Species
             dropdownmenu1()
-            dropdownmenu2()
+            //dropdownmenu2()
             
             //added jabodetabek map
             d3.json("jakarta.json", function(json) {
-				
+//console.log(data)
 				color.domain([
 					d3.min(data, function(d) { return d.weekly_volume; }),
 					d3.max(data, function(d) { return d.weekly_volume; })
@@ -1284,8 +1372,8 @@ var posit = [];
 	
 				
             });
-            
 
+/****************************************************************************************/
                         
         </script>
 
