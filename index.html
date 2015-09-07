@@ -707,7 +707,77 @@
 					
 
 									//generate the circles
-									showCity(result,gjkt,possd,"red", "circle");
+									showCity(result,gjkt,possd,"blue", "circle");
+									
+									gjkt.selectAll("circle")
+									.on("mouseover", function(d) 
+									{
+
+										var coordinates = [0, 0];
+											coordinates = d3.mouse(this);
+				//console.log(d)
+										var target = d3.select("#tooltip")
+												.style("left", coordinates[0] + "px")
+												.style("top", coordinates[1] + "px");
+											target.select("#daerah")
+												.text("DEST Subdistrict :"+d.subdistrict);
+
+											target.select("#info")
+												.text("location: " + d.location );
+												//.text(getInfo(d))
+															
+							
+										//Show tooltip
+										d3.select("#tooltip").classed("hidden", false);
+							
+							
+										//get the origin cities based on selected destination
+										var oricity = getOriginCity(d);
+				//console.log("selected:"+d.subdistrict)
+				//console.log("district:"+d.district)
+				//console.log("oricity:"+oricity)
+										var dt = function(dest,ori) 
+										{
+
+											var result = [];
+											var n = 0;
+											for (var i = 0; i < ori.length; i++)
+											{
+
+												 var dataState = ori[i];
+												 //Find the corresponding state inside the GeoJSON
+												for (var j = 0; j < dest.features.length; j++)
+												{
+													var jsonState = dest.features[j].properties.KABKOT;
+													if (dataState == jsonState ) {
+														result[n] = dest.features[j];
+														n = n + 1;
+														break;
+													}
+												}
+											}
+											return result
+										}; 
+							
+										//generate all selected origin city on Java Map
+										dt_res = dt(javjson,oricity); 
+										map2.selectAll("path")
+											.data(dt_res, function(d) { 
+												return d.properties.OBJECTID; })
+											.style("fill", "blue")//color(js.properties.value))
+											.attr("stroke-width", 2);
+										//end of generation
+							 
+									})
+									.on("mouseout", function(d)
+									{	
+										d3.select("#tooltip").classed("hidden", true);
+										//remove selection on Java Map
+										map2.selectAll("path")
+										.style("fill", setNormalColor)
+										.attr("stroke-width", 1);
+										//end removal section
+									});
 								})
 								
 							};
@@ -753,7 +823,75 @@
 					
 
 									//generate the circles
-									showCity(result,gjkt,poslbm,"blue", "rect");
+									showCity(result,gjkt,poslbm,"red", "rect");
+									
+									gjkt.selectAll("rect")
+									.on("mouseover", function(d) 
+									{
+			//console.log(d)
+										var coordinates = [0, 0];
+											coordinates = d3.mouse(this);
+										var target = d3.select("#tooltip")
+												.style("left", coordinates[0] + "px")
+												.style("top", coordinates[1] + "px");
+											target.select("#daerah")
+												.text("DEST LBM :"+d.name);
+
+											target.select("#info")
+												.text("location: " + d.location );
+												//.text(getInfo(d))
+															
+							
+										//Show tooltip
+										d3.select("#tooltip").classed("hidden", false);
+							
+										//get the origin cities based on selected destination
+										var selecteddata = getDistrictBasedOnMarketCode(d);
+										var oricity = getOriginCity(selecteddata);
+				//console.log("selected:"+selecteddata.name)
+				//console.log("district:"+selecteddata.district)
+				//console.log("oricity:"+oricity)
+										var dt = function(dest,ori) 
+										{
+
+											var result = [];
+											var n = 0;
+											for (var i = 0; i < ori.length; i++)
+											{
+
+												 var dataState = ori[i];
+												 //Find the corresponding state inside the GeoJSON
+												for (var j = 0; j < dest.features.length; j++)
+												{
+													var jsonState = dest.features[j].properties.KABKOT;
+													if (dataState == jsonState ) {
+														result[n] = dest.features[j];
+														n = n + 1;
+														break;
+													}
+												}
+											}
+											return result
+										}; 
+							
+										//generate all selected origin city on Java Map
+										dt_res = dt(javjson,oricity); 
+										map2.selectAll("path")
+											.data(dt_res, function(d) { 
+												return d.properties.OBJECTID; })
+											.style("fill", "red")//color(js.properties.value))
+											.attr("stroke-width", 2);
+										//end of generation
+									})
+									.on("mouseout", function(d)
+									{	
+										d3.select("#tooltip").classed("hidden", true);
+										//remove selection on Java Map
+										map2.selectAll("path")
+										.style("fill", setNormalColor)
+										.attr("stroke-width", 1);
+										//end removal section
+									});
 								})
 								
 							};
@@ -791,8 +929,8 @@
 								//end removal section
 							
 							d3.select("table").remove();
-							gjkt.selectAll("circle").remove();
-							gjkt.selectAll("rect").remove();
+							gjkt.selectAll("circle").transition().duration(5000).remove();
+							gjkt.selectAll("rect").transition().duration(5000).remove();
 						})
                         .on("click", function(d){clicked(d,jww,jwh,gjw, path2, projection2, zoom2)});;
 					
@@ -904,7 +1042,7 @@
             //generate the circles
             function showCity(cities, whmap, pt, color, type)
 			{		
-
+console.log(cities)
 				/* Define the data for the circles */
 				var elem = whmap.selectAll(type)
 								.data(cities)
@@ -1919,8 +2057,8 @@
 				//generate dot points as cities positions
 				//districtextraction(json, positions, projection, circles, "red")
 				
-				//subdistrictextraction(projection, gjkt, "blue")
-				//lbmextraction(projection, gjkt, "red")
+				subdistrictextraction(projection, gjkt, "blue")
+				lbmextraction(projection, gjkt, "red")
 				jakjson = json;
 				updateMapJKT(json);
 
