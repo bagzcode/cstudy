@@ -265,10 +265,12 @@
 				positions = [],
 				positions2 = [];	
 				
-			var ddm1value = "",//species
-				ddm2value = "",//type
-				ddm3value = "",//type_movement
-				ddm4value = "";//movement_into
+			var originmenu = "",//F1
+				collectormenu = "",//F2
+				destinationmenu = "",//F3
+				speciesmenu = "",//F4
+				connectionmenu = "",//F5
+				filterwidth = 200;
 			
             var setNormalColor = function(d)
             {
@@ -302,18 +304,21 @@
 				}
 				
 				//get unique data
-				unique_areatarget = areaorigin.filter(function(item, pos) 
+				var unique_areaorigin = areaorigin.filter(function(item, pos) 
 				{					
 					return areaorigin.indexOf(item) == pos;
 				});	 
-                
-                return unique_areatarget; 
+//console.log(areaselected)
+//console.log(unique_areaorigin)
+                return unique_areaorigin; 
 					
 			}
 			
-			var getDestCity = function (d) 
+			var getDestCity = function (d,type) 
             {
 				var areadest = [];
+				var areasd = [];
+				var arealbm = [];
 				var n = 0;
 				var areaselected = d.district || d.Name || d.properties.KAB_KOTA || d.properties.KABKOT;
 
@@ -322,18 +327,59 @@
 					if (data[i].district_org_source == areaselected)
 					{							
 						areadest[n] = data[i].CY_district;
+						areasd[n] = data[i].CY_subdistrict;
+						arealbm[n] = data[i].cy_id_new;
 						n = n + 1;
 						//break;
 					}
 				}
 				
 				//get unique data
-				unique_areatarget = areadest.filter(function(item, pos) 
+				var unique_areadest = areadest.filter(function(item, pos) 
 				{					
 					return areadest.indexOf(item) == pos;
-				});	 
-                
-                return unique_areatarget; 
+				});	
+				
+				//get unique data
+				var unique_areasd = areasd.filter(function(item, pos) 
+				{					
+					return areasd.indexOf(item) == pos;
+				});
+				
+				//get unique data
+				var unique_arealbm = arealbm.filter(function(item, pos) 
+				{					
+					return arealbm.indexOf(item) == pos;
+				}); 
+//console.log(areaselected)
+//console.log(unique_areadest)
+				if (type == "district"){return unique_areadest;} 
+				if (type == "subdistrict"){return unique_areasd;}
+				if (type == "lbm"){return unique_arealbm;}               
+                 
+					
+			}
+			
+			var getDistrictBasedOnMarketCode = function (d) 
+            {
+				var dist = [];
+				var n = 0;
+				var lbmCodeSelected = d.marketCode;
+
+				for (var i = 0; i < data.length; i++)
+				{
+					if (data[i].cy_id_new == lbmCodeSelected)
+					{							
+						dist[n] = data[i].CY_district;
+						d.district = data[i].CY_district;
+						n = n + 1;
+						//break;
+					}
+				}
+				
+//console.log(d.name)
+//console.log(unique_dist)                
+                return d; 
 					
 			}
 			
@@ -361,15 +407,15 @@
 				}
 							
 				//get unique data for filtering
-				unique_areatarget = areaorigin.filter(function(item, pos) 
+				var unique_areaorigin = areaorigin.filter(function(item, pos) 
 				{				
 					return areaorigin.indexOf(item) == pos;
 				});					
 				var unq_rowdat = [],
 			 		c = 0;
-				for (var i = 0; i < unique_areatarget.length; i++)
+				for (var i = 0; i < unique_areaorigin.length; i++)
 				{					 
-					 var filtcity = unique_areatarget[i];
+					 var filtcity = unique_areaorigin[i];
 					 //Find the corresponding data
 					for (var z = selrowdt.length-1; z>-1; z--)
 					{
@@ -418,16 +464,16 @@
 				}
 						
 				//get unique data for filtering
-				var unique_areatarget = areaorigin.filter(function(item, pos) 
+				var unique_areaorigin = areaorigin.filter(function(item, pos) 
 				{				
 					return areaorigin.indexOf(item) == pos;
 				});	
 					
 				var unq_rowdat = [],
 			 		c = 0;
-				for (var i = 0; i < unique_areatarget.length; i++)
+				for (var i = 0; i < unique_areaorigin.length; i++)
 				{					 
-					 var filtcity = unique_areatarget[i];
+					 var filtcity = unique_areaorigin[i];
 					 //Find the corresponding data
 					for (var z = selrowdt.length-1; z>-1; z--)
 					{
@@ -586,8 +632,8 @@
                        .on("mouseover", function(d)
 						{
 							//get the origin cities based on selected destination
-							var destcity = getDestCity(d);
-
+							var destcity = getDestCity(d, "district");
+//console.log(destcity)
 							
 							var dt = function(ori, dest) 
 							{
@@ -621,6 +667,99 @@
 								.attr("stroke-width", 2);
 							//end of generation
 							
+							//generate position subdistrict
+							var destsd = getDestCity(d, "subdistrict");
+//console.log(destsd)
+							var dtsd = function(datassd) 
+							{
+
+								d3.csv("dest1dki.csv", function(sds)
+								{
+									var result = [];
+									var n = 0;
+									var possd = [];
+									for (var i = 0; i < datassd.length; i++)
+									{
+
+										 var dataState = datassd[i];
+										 //Find the corresponding state inside the GeoJSON
+										for (var j = 0; j < sds.length; j++)
+										{
+											var jsonState = sds[j].subdistrict;
+											if (dataState == jsonState ) {
+												result[n] = sds[j];
+												var Lat = (-1*sds[j].gps_north_degree) - (+sds[j].gps_north_minute/100),
+												Long = (1*sds[j].gps_east_degree) + (+sds[j].gps_east_minute/100),
+												location = [+Long, +Lat];
+//console.log(location)
+												sds[j].location = location;
+												possd.push(projection(location));
+												n = n + 1;
+												break;
+											}
+										}
+									}
+//console.log(result+"||"+possd)
+									var g = gjkt.selectAll("g")
+									.data(result)
+									//.enter()
+									.append("svg:g");
+					
+
+									//generate the circles
+									showCity(result,gjkt,possd,"red", "circle");
+								})
+								
+							};
+							var dataselectedsd = dtsd(destsd);
+							
+							//generate position subdistrict
+							var destlbm = getDestCity(d, "lbm");
+//console.log(destlbm) 
+							var dtlbm = function(dataslbm) 
+							{
+
+								d3.csv("dest2lbm.csv", function(lbms)
+								{
+									var result = [];
+									var n = 0;
+									var poslbm = [];
+									for (var i = 0; i < dataslbm.length; i++)
+									{
+
+										 var dataState = dataslbm[i];
+										 //Find the corresponding state inside the GeoJSON
+										for (var j = 0; j < lbms.length; j++)
+										{
+											var jsonState = lbms[j].marketCode;
+											if (dataState == jsonState ) {
+												result[n] = lbms[j];
+												var Lat = (-1*lbms[j].LS_Coord_Deg) - (+lbms[j].LS_Coord_Min/100),
+													Long = (1*lbms[j].BT_Coord_Deg) + (+lbms[j].BT_Coord_Min/100),
+												location = [+Long, +Lat];
+//console.log(location)
+												lbms[j].location = location;
+												poslbm.push(projection(location));
+												n = n + 1;
+												break;
+											}
+										}
+									}
+//console.log(result+"||"+possd)
+									var g = gjkt.selectAll("g")
+									.data(result)
+									//.enter()
+									.append("svg:g");
+					
+
+									//generate the circles
+									showCity(result,gjkt,poslbm,"blue", "rect");
+								})
+								
+							};
+							var dataselectedlbm = dtlbm(destlbm);
+							
+							
 							
 							d3.select(this).style("fill", "purple");
 
@@ -652,6 +791,8 @@
 								//end removal section
 							
 							d3.select("table").remove();
+							gjkt.selectAll("circle").remove();
+							gjkt.selectAll("rect").remove();
 						})
                         .on("click", function(d){clicked(d,jww,jwh,gjw, path2, projection2, zoom2)});;
 					
@@ -692,6 +833,15 @@
 
 						return "translate("+proj.translate()+" )"
 					})
+					
+				gpath.selectAll("rect")
+					.transition()
+				  	.duration(700)
+					.attr("transform", function(d,i)
+					{
+
+						return "translate("+proj.translate()+" )"
+					})
 				
 				/*gpath.selectAll("text")
 					.transition()
@@ -705,13 +855,26 @@
 
 			//zoom function for jkt
 			function zoomed() 
-			{
-				
+			{		
 				gjkt.attr("transform","translate("+ 
 						d3.event.translate.join(",")+")scale("+d3.event.scale+")");
 				gjkt.selectAll("circle")
 					.attr("d", path.projection(projection))
-					.attr("r", 5/zoom.scale());
+					.attr("r", 5/zoom.scale())
+					.attr("stroke-width", function()
+					{	
+						if (zoom.scale()>4){return 0;}
+						else {return 1}
+					});
+				gjkt.selectAll("rect")
+					.attr("d", path.projection(projection))
+					.attr("width", 10/zoom.scale())
+					.attr("height", 10/zoom.scale())
+					.attr("stroke-width", function()
+					{	
+						if (zoom.scale()>4){return 0;}
+						else {return 1}
+					});
 				gjkt.selectAll("path")  
 					.attr("d", path.projection(projection));
 				/*gjkt.selectAll("text")  
@@ -728,6 +891,10 @@
 				gjw.selectAll("circle")
 					.attr("d", path2.projection(projection2))
 					.attr("r", 5/zoom.scale());
+				gjw.selectAll("rect")
+					.attr("d", path2.projection(projection2))
+					.attr("width", 10/zoom.scale())
+					.attr("height", 10/zoom.scale());
 				gjw.selectAll("path")  
 					.attr("d", path2.projection(projection2));
 				/*gjw.selectAll("text")  
@@ -735,11 +902,11 @@
 			}
             
             //generate the circles
-            function showCity(cities, whmap, pos, color)
+            function showCity(cities, whmap, pt, color, type)
 			{		
 
 				/* Define the data for the circles */
-				var elem = whmap.selectAll("circle")
+				var elem = whmap.selectAll(type)
 								.data(cities)
 
 				/*Create and place the "blocks" containing the circle and the text */  
@@ -748,14 +915,35 @@
 					.attr("transform", function(d,i)
 					{
 
-						return "translate("+pos[i][0]+","+pos[i][1]+" )"
+						return "translate("+pt[i][0]+","+pt[i][1]+" )"
 					})			
-				/*Create the circle for each block */
-				var circle = elemEnter.append("circle")
-									.style("stroke", "gray")
-									.style("fill", color)
-									.attr("r", 5)//function(d, i) { return Math.sqrt(countByCity[d.Name]); })
-									//.sort(function(a, b) { return countByCity[b.Name] - countByCity[a.Name]; })
+			
+				if (type == "circle")
+				{
+					/*Create the circle for each block */
+					var circle = elemEnter.append("circle")
+										.style("stroke", "gray")
+										.attr("stroke-width", 1)
+										.style("fill", color)
+										.attr("r", 5)//function(d, i) { return Math.sqrt(countByCity[d.Name]); })
+										//.sort(function(a, b) { return countByCity[b.Name] - countByCity[a.Name]; })
+										pt = [];
+				}
+										
+				if (type == "rect")
+				{
+				/*Create the rect for each block */
+				
+					var rect = elemEnter.append("rect")
+										.style("stroke", "gray")
+										.attr("stroke-width", 1)
+										.style("fill", color)
+										.attr("height", 10)
+										.attr("width", 10)//function(d, i) { return Math.sqrt(countByCity[d.Name]); })
+										//.sort(function(a, b) { return countByCity[b.Name] - countByCity[a.Name]; })
+										pt = [];
+				}
+				
 
 				/* Create the text for each block */
 				/*elemEnter.append("text")
@@ -771,39 +959,10 @@
 			}
 			
 			//show circles of lbm positions (on JKT Map: Color Red Circles) 
-			function lbmextraction(datajson, pos, proj, shape, citycolor)
+			function lbmextraction(proj, shape, citycolor)
 			{
 				
-			
-				d3.csv("dest2lbm.csv", function(cities) 
-				{
-					
-					cities = cities.filter(function(city) 
-					{						
-						
-							var Lat = (-1*city.LS_Coord_Deg) - (+city.LS_Coord_Min/100),
-							Long = (1*city.BT_Coord_Deg) + (+city.BT_Coord_Min/100),
-							location = [+Long, +Lat];
-							locationByCity[city.name] = location;
-							pos.push(proj(location));
-
-							return true;
-						
-					});
-				
-					var g = shape.selectAll("g")
-						.data(cities)
-						//.enter()
-						.append("svg:g");
-					
-					//generate the circles
-					showCity(cities,shape,pos,citycolor);
-					});	
-			};
-			
-			//show circles of subdistrict positions (on JKT Map: Color Blue Circles)
-			function subdistrictextraction(datajson, pos, proj, shape, citycolor)
-			{
+				var poslbm = [];
 				var arc = d3.geo.greatArc()
 					  .source(function(d) { return locationByCity[d.source]; })
 					  .target(function(d) { return locationByCity[d.target]; });
@@ -811,7 +970,123 @@
 				data.forEach(function(deliver) 
 				{
 					var origin = deliver.district_org_source,
-						destination = deliver.CY_district,
+						destination = deliver.cy_id_new,
+						links = linksByOrigin[origin] || (linksByOrigin[origin] = []);
+						
+					links.push({source: origin, target: destination});
+					countByCity[origin] = (countByCity[origin] || 0) + 1;
+					countByCity[destination] = (countByCity[destination] || 0) + 1;
+				});
+				
+				d3.csv("dest2lbm.csv", function(lbms) 
+				{
+					
+					lbms = lbms.filter(function(lbm) 
+					{						
+						if (countByCity[lbm.marketCode]) 
+						{
+							var Lat = (-1*lbm.LS_Coord_Deg) - (+lbm.LS_Coord_Min/100),
+							Long = (1*lbm.BT_Coord_Deg) + (+lbm.BT_Coord_Min/100),
+							locationlbm = [+Long, +Lat];
+							lbm.location = locationlbm
+							locationByCity[lbm.name] = locationlbm;
+							poslbm.push(proj(locationlbm));
+
+							return true;
+						}
+						
+					});
+				
+					var g = shape.selectAll("g")
+						.data(lbms)
+						//.enter()
+						.append("svg:g");
+					
+					//generate the circles
+					showCity(lbms,shape,poslbm,citycolor,"rect");
+					
+					shape.selectAll("rect")
+						.on("mouseover", function(d) 
+						{
+//console.log(d)
+							var coordinates = [0, 0];
+								coordinates = d3.mouse(this);
+							var target = d3.select("#tooltip")
+									.style("left", coordinates[0] + "px")
+									.style("top", coordinates[1] + "px");
+								target.select("#daerah")
+									.text("DEST LBM :"+d.name);
+
+								target.select("#info")
+									.text("location: " + d.location );
+									//.text(getInfo(d))
+															
+							
+							//Show tooltip
+							d3.select("#tooltip").classed("hidden", false);
+							
+							//get the origin cities based on selected destination
+							var selecteddata = getDistrictBasedOnMarketCode(d);
+							var oricity = getOriginCity(selecteddata);
+	//console.log("selected:"+selecteddata.name)
+	//console.log("district:"+selecteddata.district)
+	//console.log("oricity:"+oricity)
+							var dt = function(dest,ori) 
+							{
+
+								var result = [];
+								var n = 0;
+								for (var i = 0; i < ori.length; i++)
+								{
+
+									 var dataState = ori[i];
+									 //Find the corresponding state inside the GeoJSON
+									for (var j = 0; j < dest.features.length; j++)
+									{
+										var jsonState = dest.features[j].properties.KABKOT;
+										if (dataState == jsonState ) {
+											result[n] = dest.features[j];
+											n = n + 1;
+											break;
+										}
+									}
+								}
+								return result
+							}; 
+							
+							//generate all selected origin city on Java Map
+							dt_res = dt(javjson,oricity); 
+							map2.selectAll("path")
+								.data(dt_res, function(d) { 
+									return d.properties.OBJECTID; })
+								.style("fill", "red")//color(js.properties.value))
+								.attr("stroke-width", 2);
+							//end of generation
+						})
+						.on("mouseout", function(d)
+						{	
+							d3.select("#tooltip").classed("hidden", true);
+							//remove selection on Java Map
+							map2.selectAll("path")
+							.style("fill", setNormalColor)
+							.attr("stroke-width", 1);
+							//end removal section
+						});
+				});	
+			};
+			
+			//show circles of subdistrict positions (on JKT Map: Color Blue Circles)
+			function subdistrictextraction(proj, shape, citycolor)
+			{
+				var possd=[];
+				var arc = d3.geo.greatArc()
+					  .source(function(d) { return locationByCity[d.source]; })
+					  .target(function(d) { return locationByCity[d.target]; });
+
+				data.forEach(function(deliver) 
+				{
+					var origin = deliver.district_org_source,
+						destination = deliver.CY_subdistrict,
 						links = linksByOrigin[origin] || (linksByOrigin[origin] = []);
 						
 					links.push({source: origin, target: destination});
@@ -819,39 +1094,61 @@
 					countByCity[destination] = (countByCity[destination] || 0) + 1;
 				});
 			
-				d3.csv("dest1dki.csv", function(cities) 
+				d3.csv("dest1dki.csv", function(sds) 
 				{
 					// Only consider cities with at least one deliver.
-					cities = cities.filter(function(city) 
+					sds = sds.filter(function(sd) 
 					{
 			
-						if (countByCity[city.district]) 
+						if (countByCity[sd.subdistrict]) 
 						{
-							var Lat = (-1*city.gps_north_degree) - (+city.gps_north_minute/100),
-							Long = (1*city.gps_east_degree) + (+city.gps_east_minute/100),
+							var Lat = (-1*sd.gps_north_degree) - (+sd.gps_north_minute/100),
+							Long = (1*sd.gps_east_degree) + (+sd.gps_east_minute/100),
 							location = [+Long, +Lat];
-							locationByCity[city.subdistrict] = location;
-							pos.push(proj(location));
+							sd.location = location;
+							locationByCity[sd.subdistrict] = location;
+							possd.push(proj(location));
 							return true;
 						}
 					});
 				
 					var g = shape.selectAll("g")
-						.data(cities)
+						.data(sds)
 						//.enter()
 						.append("svg:g");
 					
 
 					//generate the circles
-					showCity(cities,shape,pos,citycolor);
+					showCity(sds,shape,possd,citycolor, "circle");
 					
 				
 					shape.selectAll("circle")
 						.on("mouseover", function(d) 
 						{
 
+							var coordinates = [0, 0];
+								coordinates = d3.mouse(this);
+	//console.log(d)
+							var target = d3.select("#tooltip")
+									.style("left", coordinates[0] + "px")
+									.style("top", coordinates[1] + "px");
+								target.select("#daerah")
+									.text("DEST Subdistrict :"+d.subdistrict);
+
+								target.select("#info")
+									.text("location: " + d.location );
+									//.text(getInfo(d))
+															
+							
+							//Show tooltip
+							d3.select("#tooltip").classed("hidden", false);
+							
+							
 							//get the origin cities based on selected destination
 							var oricity = getOriginCity(d);
+	//console.log("selected:"+d.subdistrict)
+	//console.log("district:"+d.district)
+	//console.log("oricity:"+oricity)
 							var dt = function(dest,ori) 
 							{
 
@@ -887,6 +1184,7 @@
 						})
 						.on("mouseout", function(d)
 						{	
+							d3.select("#tooltip").classed("hidden", true);
 							//remove selection on Java Map
 							map2.selectAll("path")
 							.style("fill", setNormalColor)
@@ -1100,10 +1398,10 @@
 					.attr("stop-color", "rgb(0,109,44)");
 			}
 			
-			//load dropdown menu for filter
-			function dropdownmenu1()
+			//load filter options
+			function Filter1_Origins()
 			{
-				var dispatch = d3.dispatch("load", "specieschange");
+				var dispatch = d3.dispatch("load", "originschange");
 
 				d3.xhr('Movement.csv').get(function (err, response) 
 				{
@@ -1118,7 +1416,7 @@
 						speciesById.set(d.species, d); 
 					});
 					dispatch.load(speciesById);
-					dispatch.specieschange(speciesById.get("ALL"));
+					//dispatch.specieschange(speciesById.get("ALL"));
 
 				});
 								
@@ -1127,18 +1425,18 @@
 					var select = svg.append("foreignObject")
 							.attr("x", 1.5*margin)
 							.attr("y", 2*margin)
-							.attr("width", 500)
-							.attr("height",30)
+							.attr("width", filterwidth)
+							.attr("height",100)
 							.append("xhtml:body")
 							.append("div")
-							.text("Filter by SPECIES : ")
+							.attr("id", "f1")
+							.text("ORIGINS : ")
 							.append("select")
+							//.attr("multiple","multiple")
 							.on("change", function () 
 							{ 
 								dispatch.specieschange(speciesById.get(this.value)); 
 							});
-
-					
 							
 					select.selectAll("option")
 							.data(speciesById.values())
@@ -1150,26 +1448,32 @@
 								return d.species; 
 							});
 							
-					select.append("option")
+					/*select.append("option")
 							.attr("value", "ALL")
 							.text("ALL");
-
-					dispatch.on("specieschange.menu", function (spec) 
+*/
+					dispatch.on("originschange.menu", function (spec) 
 					{
 						select.property("value", spec)
 						//loading the value based on the selected data
-						/*var svg1 = d3.select("body").append("svg1")
-							.attr("width", width)
-							.attr("height", height)*/
+						//var svg1 = d3.select("body").append("svg1")
+						//	.attr("width", width)
+						//	.attr("height", height)
 						//end of selection
-						ddm1value = "ALL";
+						select.selectAll("option")
+							.filter(function (d, i) 
+							{ 
+								return this.selected; 
+							});
+						console.log(spec)
+						/*ddm1value = "ALL";
 						if (typeof spec != 'undefined')
 						{
 							ddm1value = spec.species;
 						}
 						// set new csv data based on filter from dropdownmenu1 value(ddm1value)
 						datafilter(ddm1value,ddm2value,ddm3value,ddm4value);
-				
+				*/
 						
 
 					});
@@ -1177,55 +1481,330 @@
 				//end of drop down
 			}
 			
-			//dropdown for second filter (disable at the moment)
-			function dropdownmenu2()
+			function Filter2_Collectors()
 			{
-				var dispatch = d3.dispatch("load", "countrychange");
+				var dispatch = d3.dispatch("load2", "collectorsschange");
 
 				d3.xhr('Movement.csv').get(function (err, response) 
 				{
-				  //if (error) throw error;
-				  //var dirtyCSV = response.responseText;
-				  //var cleanCSV = dirtyCSV.split('\n').slice(1).join('\n');
-				  //data = d3.csv.parse(cleanCSV);
-				  var countryById = d3.map();
-				  data.forEach(function (d) 
-				  { 
-					countryById.set(d.Type_movement_IN_or_OUT, d); 
-				  });
-				  dispatch.load(countryById);
-				  //dispatch.countrychange(countryById.get("PH"));
-			  
+					//if (error) throw error;
+					//var dirtyCSV = response.responseText;
+					//var cleanCSV = dirtyCSV.split('\n').slice(1).join('\n');
+					//data = d3.csv.parse(cleanCSV);
+//console.log(data)
+					var speciesById = d3.map();
+					data.forEach(function (d) 
+					{ 
+						speciesById.set(d.species, d); 
+					});
+					dispatch.load2(speciesById);
+					//dispatch.specieschange(speciesById.get("ALL"));
+
 				});
 								
-				dispatch.on("load.menu", function(countryById) {
-				  var select = svg.append("foreignObject")
-				  	.attr("x", 1.5*margin+200)
-					.attr("y", 2*margin)
-					.attr("width", 500)
-					.attr("height",30)
-					.append("xhtml:body")
-					.append("div")
-					.text("Filter by MOVEMENT : ")
-					.append("select")
-					.on("change", function () { dispatch.countrychange(countryById.get(this.value)); });
+				dispatch.on("load2.menu", function(speciesById) 
+				{
+					var select = svg.append("foreignObject")
+							.attr("x", 1.5*margin+1*filterwidth)
+							.attr("y", 2*margin)
+							.attr("width", filterwidth)
+							.attr("height",100)
+							.append("xhtml:body")
+							.append("div")
+							.attr("id", "f1")
+							.text("COLLECTORS : ")
+							.append("select")
+							//.attr("multiple","multiple")
+							.on("change", function () 
+							{ 
+								dispatch.specieschange(speciesById.get(this.value)); 
+							});
+							
+					select.selectAll("option")
+							.data(speciesById.values())
+							.enter()
+							.append("option")
+							.attr("value", function (d) { return d.species; })
+							.text(function (d) 
+							{ 
+								return d.species; 
+							});
+							
+					/*select.append("option")
+							.attr("value", "ALL")
+							.text("ALL");
+*/
+					dispatch.on("collectorsschange.menu", function (spec) 
+					{
+						select.property("value", spec)
+						//loading the value based on the selected data
+						//var svg1 = d3.select("body").append("svg1")
+						//	.attr("width", width)
+						//	.attr("height", height)
+						//end of selection
+						select.selectAll("option")
+							.filter(function (d, i) 
+							{ 
+								return this.selected; 
+							});
+						console.log(spec)
+						/*ddm1value = "ALL";
+						if (typeof spec != 'undefined')
+						{
+							ddm1value = spec.species;
+						}
+						// set new csv data based on filter from dropdownmenu1 value(ddm1value)
+						datafilter(ddm1value,ddm2value,ddm3value,ddm4value);
+				*/
+						
 
-				  select.selectAll("option")
-					.data(countryById.values())
-					.enter().append("option")
-					.attr("value", function (d) { return d.Type_movement_IN_or_OUT; })
-					.text(function (d) { return d.Type_movement_IN_or_OUT; });
+					});
+				});
+				//end of drop down
+			}
+			
+			function Filter3_Destinations()
+			{
+				var dispatch = d3.dispatch("load3", "destinationschange");
 
-				  dispatch.on("countrychange.menu", function (country) {
-					  select.property("value", country)
-					  //loading the value based on the selected data
-					  var svg1 = d3.select("body").append("svg1")
-							.attr("width", width)
-							.attr("height", height)
-					  //end of selection
+				d3.xhr('Movement.csv').get(function (err, response) 
+				{
+					//if (error) throw error;
+					//var dirtyCSV = response.responseText;
+					//var cleanCSV = dirtyCSV.split('\n').slice(1).join('\n');
+					//data = d3.csv.parse(cleanCSV);
+//console.log(data)
+					var speciesById = d3.map();
+					data.forEach(function (d) 
+					{ 
+						speciesById.set(d.species, d); 
+					});
+					dispatch.load3(speciesById);
+					//dispatch.specieschange(speciesById.get("ALL"));
 
-console.log(country);
-				  });
+				});
+								
+				dispatch.on("load3.menu", function(speciesById) 
+				{
+					var select = svg.append("foreignObject")
+							.attr("x", 1.5*margin+2*filterwidth)
+							.attr("y", 2*margin)
+							.attr("width", filterwidth)
+							.attr("height",100)
+							.append("xhtml:body")
+							.append("div")
+							.attr("id", "f1")
+							.text("DESTINATIONS : ")
+							.append("select")
+							//.attr("multiple","multiple")
+							.on("change", function () 
+							{ 
+								dispatch.specieschange(speciesById.get(this.value)); 
+							});
+							
+					select.selectAll("option")
+							.data(speciesById.values())
+							.enter()
+							.append("option")
+							.attr("value", function (d) { return d.species; })
+							.text(function (d) 
+							{ 
+								return d.species; 
+							});
+							
+					/*select.append("option")
+							.attr("value", "ALL")
+							.text("ALL");
+*/
+					dispatch.on("destinationschange.menu", function (spec) 
+					{
+						select.property("value", spec)
+						//loading the value based on the selected data
+						//var svg1 = d3.select("body").append("svg1")
+						//	.attr("width", width)
+						//	.attr("height", height)
+						//end of selection
+						select.selectAll("option")
+							.filter(function (d, i) 
+							{ 
+								return this.selected; 
+							});
+						console.log(spec)
+						/*ddm1value = "ALL";
+						if (typeof spec != 'undefined')
+						{
+							ddm1value = spec.species;
+						}
+						// set new csv data based on filter from dropdownmenu1 value(ddm1value)
+						datafilter(ddm1value,ddm2value,ddm3value,ddm4value);
+				*/
+						
+
+					});
+				});
+				//end of drop down
+			}
+			
+			function Filter4_Species()
+			{
+				var dispatch = d3.dispatch("load4", "specieschange");
+
+				d3.xhr('Movement.csv').get(function (err, response) 
+				{
+					//if (error) throw error;
+					//var dirtyCSV = response.responseText;
+					//var cleanCSV = dirtyCSV.split('\n').slice(1).join('\n');
+					//data = d3.csv.parse(cleanCSV);
+//console.log(data)
+					var speciesById = d3.map();
+					data.forEach(function (d) 
+					{ 
+						speciesById.set(d.species, d); 
+					});
+					dispatch.load4(speciesById);
+					//dispatch.specieschange(speciesById.get("ALL"));
+
+				});
+								
+				dispatch.on("load4.menu", function(speciesById) 
+				{
+					var select = svg.append("foreignObject")
+							.attr("x", 1.5*margin+3*filterwidth)
+							.attr("y", 2*margin)
+							.attr("width", filterwidth)
+							.attr("height",100)
+							.append("xhtml:body")
+							.append("div")
+							.attr("id", "f1")
+							.text("SPECIES : ")
+							.append("select")
+							//.attr("multiple","multiple")
+							.on("change", function () 
+							{ 
+								dispatch.specieschange(speciesById.get(this.value)); 
+							});
+							
+					select.selectAll("option")
+							.data(speciesById.values())
+							.enter()
+							.append("option")
+							.attr("value", function (d) { return d.species; })
+							.text(function (d) 
+							{ 
+								return d.species; 
+							});
+							
+					/*select.append("option")
+							.attr("value", "ALL")
+							.text("ALL");
+*/
+					dispatch.on("specieschange.menu", function (spec) 
+					{
+						select.property("value", spec)
+						//loading the value based on the selected data
+						//var svg1 = d3.select("body").append("svg1")
+						//	.attr("width", width)
+						//	.attr("height", height)
+						//end of selection
+						select.selectAll("option")
+							.filter(function (d, i) 
+							{ 
+								return this.selected; 
+							});
+						console.log(spec)
+						/*ddm1value = "ALL";
+						if (typeof spec != 'undefined')
+						{
+							ddm1value = spec.species;
+						}
+						// set new csv data based on filter from dropdownmenu1 value(ddm1value)
+						datafilter(ddm1value,ddm2value,ddm3value,ddm4value);
+				*/
+						
+
+					});
+				});
+				//end of drop down
+			}
+			
+			function Filter5_Connections()
+			{
+				var dispatch = d3.dispatch("load5", "connectionschange");
+
+				d3.xhr('Movement.csv').get(function (err, response) 
+				{
+					//if (error) throw error;
+					//var dirtyCSV = response.responseText;
+					//var cleanCSV = dirtyCSV.split('\n').slice(1).join('\n');
+					//data = d3.csv.parse(cleanCSV);
+//console.log(data)
+					var speciesById = d3.map();
+					data.forEach(function (d) 
+					{ 
+						speciesById.set(d.species, d); 
+					});
+					dispatch.load5(speciesById);
+					//dispatch.specieschange(speciesById.get("ALL"));
+
+				});
+								
+				dispatch.on("load5.menu", function(speciesById) 
+				{
+					var select = svg.append("foreignObject")
+							.attr("x", 1.5*margin+4*filterwidth)
+							.attr("y", 2*margin)
+							.attr("width", filterwidth)
+							.attr("height",100)
+							.append("xhtml:body")
+							.append("div")
+							.attr("id", "f1")
+							.text("CONNECTIONS : ")
+							.append("select")
+							//.attr("multiple","multiple")
+							.on("change", function () 
+							{ 
+								dispatch.specieschange(speciesById.get(this.value)); 
+							});
+							
+					select.selectAll("option")
+							.data(speciesById.values())
+							.enter()
+							.append("option")
+							.attr("value", function (d) { return d.species; })
+							.text(function (d) 
+							{ 
+								return d.species; 
+							});
+							
+					/*select.append("option")
+							.attr("value", "ALL")
+							.text("ALL");
+*/
+					dispatch.on("connectionschange.menu", function (spec) 
+					{
+						select.property("value", spec)
+						//loading the value based on the selected data
+						//var svg1 = d3.select("body").append("svg1")
+						//	.attr("width", width)
+						//	.attr("height", height)
+						//end of selection
+						select.selectAll("option")
+							.filter(function (d, i) 
+							{ 
+								return this.selected; 
+							});
+						console.log(spec)
+						/*ddm1value = "ALL";
+						if (typeof spec != 'undefined')
+						{
+							ddm1value = spec.species;
+						}
+						// set new csv data based on filter from dropdownmenu1 value(ddm1value)
+						datafilter(ddm1value,ddm2value,ddm3value,ddm4value);
+				*/
+						
+
+					});
 				});
 				//end of drop down
 			}
@@ -1276,35 +1855,17 @@ console.log(country);
             //added graph bar
             //scalegraph()
             
-            //added dropdownmenu for filter based on Species
-            dropdownmenu1()
-            //dropdownmenu2()
+            //added filter(s)
+            Filter1_Origins();
+            Filter2_Collectors();
+            Filter3_Destinations();
+            Filter4_Species();
+            Filter5_Connections();
+            
             
             //added jabodetabek map
             d3.json("jakarta.json", function(json) {
-//console.log(data)
-				color.domain([
-					d3.min(data, function(d) { return d.weekly_volume; }),
-					d3.max(data, function(d) { return d.weekly_volume; })
-					]);
 
-				for (var i = 0; i < data.length; i++)
-				{
-					var dataState = data[i].CY_district;
-					var dataValue = parseInt(data[i].weekly_volume);
-
-					 //Find the corresponding state inside the GeoJSON
-					for (var j = 0; j < json.features.length; j++)
-					{
-						var jsonState = json.features[j].properties.KAB_KOTA;
-						if (dataState == jsonState ) {
-							//Copy the data value into the JSON
-							json.features[j].properties.value = dataValue;
-							//Stop looking through the JSON
-							break;
-						}
-					}
-				}
 /*				
 				//add information of Kab_Kota from JABODETABEK map into the bar chart list
 				var areadistrict = json.features.filter(function(d, i) {
@@ -1357,8 +1918,9 @@ console.log(country);
 */							
 				//generate dot points as cities positions
 				//districtextraction(json, positions, projection, circles, "red")
-				lbmextraction(json, positions, projection, gjkt, "blue")
-				subdistrictextraction(json, positions, projection, gjkt, "red")
+				
+				//subdistrictextraction(projection, gjkt, "blue")
+				//lbmextraction(projection, gjkt, "red")
 				jakjson = json;
 				updateMapJKT(json);
 
@@ -1369,46 +1931,26 @@ console.log(country);
                    
         	// generate SVG for second Geojson MAP (java island)  
 			d3.json("Java_District.geojson", function(json) {
-				
-				//match data (variable global assigned on jkt-json) from CSV file and map				
-				for (var i = 0; i < data.length; i++)
-				{
-					var dataState = data[i].CY_district;
-					var dataValue = parseInt(data[i].weekly_volume);
-
-					 //Find the corresponding state inside the GeoJSON
-					for (var j = 0; j < json.features.length; j++)
-					{
-						var jsonState = json.features[j].properties.KABKOT;
-
-						if (dataState == jsonState ) {
-							//Copy the data value into the JSON
-							json.features[j].properties.value = dataValue;
-							//Stop looking through the JSON
-							break;
-						}
-					}
-				}
-var posit = [];				
-				//aasign long and lat oh java district based on centroid  
+			
+				/*
+				//assigned long and lat oh java district based on centroid  
 				for	 (var i = 0; i < json.features.length; i++)
 				{
 					var centroid_value = path2.centroid(json.features[i]),
 						translate = projection2.translate();
 					json.features[i].properties.longitude = (translate[0]-centroid_value[0]-(jww/2));
 					json.features[i].properties.latitude = (translate[1]-centroid_value[1]-(jwh/2));
-//console.log((translate[0]-centroid_value[0]-(jww/2))+","+(translate[1]-centroid_value[1]-(jwh/2)))
-//posit[i][0] = (translate[0]-centroid_value[0]-(jww/2));
-//posit[i][1] = (translate[1]-centroid_value[1]-(jwh/2));
+
 					if (json.features[i].properties.KABKOT == "JAKARTA UTARA")
 					{
 					
 					}	 
 				}
-//console.log(posit)				
+				*/
+			
 				//showCity (json, circles2, posit , "brown")		
 				//districtextraction(json, positions2, projection2, circles2, "orange");
-				subdistrictextraction(json, positions2, projection2, gjw, "blue");
+				//subdistrictextraction(projection2, gjw, "blue");
 				javjson = json;  
              	updateMapJAVA(json);
 	
