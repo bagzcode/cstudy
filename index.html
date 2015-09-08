@@ -266,7 +266,7 @@
 			var originmenu = "",//F1
 				collectormenu = "",//F2
 				destinationmenu = "",//F3
-				speciesmenu = "",//F4
+				speciesmenu = [],//F4
 				connectionmenu = "",//F5
 				filterwidth = 120;
 			
@@ -1686,7 +1686,7 @@
 			function Filter4_Species()
 			{
 				var dispatch = d3.dispatch("load4", "specieschange");
-				var ALL = {species:"All Species"};
+				//var ALL = {species:"All Species"};
 
 				d3.xhr('Movement.csv').get(function (err, response) 
 				{					
@@ -1695,7 +1695,7 @@
 					var cleanCSV = dirtyCSV.split('\n').slice(1).join('\n');
 					data = d3.csv.parse(cleanCSV); 
 					var speciesById = d3.map();
-					speciesById.set(ALL.species, ALL);
+					//speciesById.set(ALL.species, ALL);
 					data.forEach(function (d) 
 					{ 
 						speciesById.set(d.species, d); 
@@ -1716,8 +1716,12 @@
 							.append("div")
 							.attr("id", "f4")
 							.text("SPECIES : ")
+							//.attr("style","vertical-align: top")
 							.append("select")
-							//.attr("multiple","multiple")
+							.attr("multiple","multiple")
+							.attr("size",5) 
+							//.attr("style","width: 200px")
+							.attr("style","height: 100%")
 							.on("change", function () 
 							{ 
 								dispatch.specieschange(speciesById.get(this.value)); 
@@ -1735,8 +1739,25 @@
 							
 					dispatch.on("specieschange.menu", function (val) 
 					{
-						select.property("value", val.species)
-//console.log(val.species)
+						//select.property("value", val.species)
+						speciesmenu = [];
+						var spec = select
+							.selectAll("option")
+							.filter(function (d, i) { 
+								return this.selected; 
+							});
+						var datelegth = spec[0].length
+						if (datelegth != 0)
+						{
+							for (var j = 0; j < spec[0].length; j++)
+							{
+								speciesmenu[j] = spec[0][j]['value'];
+							}
+							
+						}
+						//console.log(speciesmenu)	
+
+
 						/*
 						select.selectAll("option")
 							.filter(function (d, i) 
@@ -1746,7 +1767,7 @@
 						*/
 						//if (typeof val != 'undefined')
 						//{
-							speciesmenu = val.species;
+							//speciesmenu = val.species;
 						//}
 						// set new csv data based on filter from dropdownmenu1 value(ddm1value)
 						datafilter(originmenu, collectormenu, destinationmenu, speciesmenu, connectionmenu)
@@ -1850,14 +1871,27 @@
 					gjkt.selectAll("rect").remove();
 				}
 				
-				if (species != "All Species")
+				if (species.length != 0)
 				{
-					//filter data with new variable 
-					var datafilter = data.filter(function(dat) 
-						{
-							return dat.species == species
-						});
+					var datafilter = [];
+					var n = 0;
+					for (var j = 0; j < species.length; j++)
+					{
+						var selectedspecies = species[j];
+						for (var i = 0; i < data.length; i++) 
+						{ 
+							if (data[i].species == selectedspecies ) 
+							{
+								datafilter[n] = data[i];
+								n = n + 1; 
+								//break;
+							} 
+						};
+						
+					}
+						
 					data = datafilter;
+console.log([species])
 				}
 				
 				
@@ -1986,7 +2020,7 @@
 				//districtextraction(json, positions2, projection2, circles2, "orange");
 				//subdistrictextraction(projection2, gjw, "blue");
 				javjson = json;  
-             	updateMapJAVA(json);
+             	//updateMapJAVA(json);
 	
 				
             });
