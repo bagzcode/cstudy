@@ -622,7 +622,7 @@
 						{
 							
 /************************** generate position district **********************************/
-							if (destinationmenu == "District (D)" || destinationmenu == "D+SD" || destinationmenu == "D+LBM")
+							if (destinationmenu == "District (D)" || destinationmenu == "D+SD" || destinationmenu == "D+LBM" || destinationmenu == "D+SD+LBM")
 							{
 								//get the origin cities based on selected destination
 								var destcity = getDestCity(d, "district");
@@ -657,7 +657,7 @@
 							}
 							
 /************************** generate position subdistrict *******************************/
-							if (destinationmenu == "SubDistrict (SD)" || destinationmenu == "D+SD" || destinationmenu == "SD+LBM")
+							if (destinationmenu == "SubDistrict (SD)" || destinationmenu == "D+SD" || destinationmenu == "SD+LBM" || destinationmenu == "D+SD+LBM")
 							{
 								var destsd = getDestCity(d, "subdistrict");
 								var dtsd = function(datassd) 
@@ -769,7 +769,7 @@
 								var dataselectedsd = dtsd(destsd);
 							}
 /************************** generate position LBM ***************************************/
-							if (destinationmenu == "LBM" || destinationmenu == "D+LBM" || destinationmenu == "SD+LBM")
+							if (destinationmenu == "LBM" || destinationmenu == "D+LBM" || destinationmenu == "SD+LBM" || destinationmenu == "D+SD+LBM")
 							{
 								var destlbm = getDestCity(d, "lbm");
 								var dtlbm = function(dataslbm) 
@@ -911,6 +911,19 @@
 							d3.select("table").remove();
 							gjkt.selectAll("circle").remove();
 							gjkt.selectAll("rect").remove();
+							/*if (collectormenu == "All Dest")
+							{
+								lbmextraction(projection, gjkt, "red")
+								subdistrictextraction(projection, gjkt, "blue")
+							}
+							if (collectormenu == "SubDistrict") 
+							{
+								subdistrictextraction(projection, gjkt, "blue")
+							}
+							if (collectormenu == "SubDistrict")  
+							{
+								lbmextraction(projection, gjkt, "red")
+							}*/
 							//mySD = setTimeout(function(){ gjkt.selectAll("circle").remove(); }, 5000);
 							//myLBM = setTimeout(function(){gjkt.selectAll("rect").remove();}, 5000);
 						})
@@ -1628,7 +1641,7 @@
 			function Filter3_Destinations()
 			{
 				var dispatch = d3.dispatch("load3", "destinationschange");
-				var dtddm3 = ["District (D)","SubDistrict (SD)", "LBM", "D+SD", "D+LBM", "SD+LBM"];
+				var dtddm3 = ["District (D)","SubDistrict (SD)", "LBM", "D+SD", "D+LBM", "SD+LBM", "D+SD+LBM"];
 
 				d3.xhr("Movement.csv").get(function () 
 				{
@@ -1638,7 +1651,7 @@
 						dtddm3ById.set(d, d); 
 					});
 					dispatch.load3(dtddm3ById);
-					dispatch.destinationschange(dtddm3ById.get("District"));
+					dispatch.destinationschange(dtddm3ById.get("D+SD+LBM"));
 				});
 								
 				dispatch.on("load3.menu", function(dtddm3ById) 
@@ -1844,7 +1857,7 @@
 				//reset data variable into original data
 				data = datadump;
 
-//console.log(origin+", "+connector+", "+destination+", "+species+", "+connection);
+console.log(origin+", "+connector+", "+destination+", "+species+", "+connection);
 				if (connector == "All Dest")
 				{
 					gjkt.selectAll("circle").remove(); 
