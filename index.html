@@ -52,7 +52,6 @@
 
             #tooltip {
 			        position: absolute;
-			        width: 300px;
 			        height: auto;
 			        padding: 10px;
 			        background-color: white;
@@ -558,8 +557,9 @@
 								coordinates = d3.mouse(this);
 	
 							var target = d3.select("#tooltip")
-									.style("left", coordinates[0] + "px")
-									.style("top", coordinates[1] + "px");
+									.style("left", 2*margin+"px")//coordinates[0] + "px")
+									.style("top", ((margin*9)+15)+"px")//coordinates[1] + "px")
+									.style("width", jktw-2*margin-5+"px");
 								target.select("#daerah")
 									.text("DESTINATION :"+d.properties.KAB_KOTA);
 
@@ -620,6 +620,8 @@
                        .style("stroke", "rgb(0,109,44)")
                        .on("mouseover", function(d)
 						{
+							gjkt.selectAll("circle").remove();
+							gjkt.selectAll("rect").remove();
 							
 /************************** generate position district **********************************/
 							if (destinationmenu == "District (D)" || destinationmenu == "D+SD" || destinationmenu == "D+LBM" || destinationmenu == "D+SD+LBM")
@@ -705,8 +707,9 @@
 											var coordinates = [0, 0];
 												coordinates = d3.mouse(this);
 											var target = d3.select("#tooltip")
-													.style("left", coordinates[0] + "px")
-													.style("top", coordinates[1] + "px");
+													.style("left", 2*margin+"px")//coordinates[0] + "px")
+													.style("top", ((margin*9)+15)+"px")//coordinates[1] + "px")
+													.style("width", jktw-2*margin-5+"px");
 												target.select("#daerah")
 													.text("DEST Subdistrict :"+d.subdistrict);
 
@@ -815,8 +818,9 @@
 											var coordinates = [0, 0];
 												coordinates = d3.mouse(this);
 											var target = d3.select("#tooltip")
-													.style("left", coordinates[0] + "px")
-													.style("top", coordinates[1] + "px");
+													.style("left", 2*margin+"px")//coordinates[0] + "px")
+													.style("top", ((margin*9)+15)+"px")//coordinates[1] + "px")
+													.style("width", jktw-2*margin-5+"px");
 												target.select("#daerah")
 													.text("DEST LBM :"+d.name);
 
@@ -880,12 +884,13 @@
 							
 /************************** generate select-self district position and Bubble text ******/									
 							d3.select(this).style("fill", "purple");
-
+//console.log(d3.select(this))
 							var coordinates = [0, 0];
 								coordinates = d3.mouse(this);
 							var target = d3.select("#tooltip")
-								.style("left", coordinates[0] + "px")
-								.style("top", coordinates[1] + "px");
+								.style("left", 2*margin+"px")//coordinates[0] + "px")
+								.style("top", ((margin*9)+15)+"px")//coordinates[1] + "px")
+								.style("width", jktw-2*margin-5+"px");
 
 							target.select("#daerah").text("Origin : "+d.properties.KABKOT+" - " + d.properties.PROVINSI);
 							//target.select("#info").text(getInfo2(d));
@@ -896,9 +901,12 @@
 /************************** generate table info *****************************************/
 							var JavTable = tabulate(datamovjav, ["species", "CY_district", "tot"]);
 
+
+
 						})
                     	.on("mouseout", function(d)
                     	{
+							
 							d3.select(this).style("fill", setNormalColor(d));
 							d3.select("#tooltip").classed("hidden", true);
 							
@@ -911,21 +919,27 @@
 							d3.select("table").remove();
 							gjkt.selectAll("circle").remove();
 							gjkt.selectAll("rect").remove();
-							/*if (collectormenu == "All Dest")
-							{
-								lbmextraction(projection, gjkt, "red")
-								subdistrictextraction(projection, gjkt, "blue")
-							}
-							if (collectormenu == "SubDistrict") 
-							{
-								subdistrictextraction(projection, gjkt, "blue")
-							}
-							if (collectormenu == "SubDistrict")  
-							{
-								lbmextraction(projection, gjkt, "red")
-							}*/
+							
 							//mySD = setTimeout(function(){ gjkt.selectAll("circle").remove(); }, 5000);
 							//myLBM = setTimeout(function(){gjkt.selectAll("rect").remove();}, 5000);
+							
+/************************** returning the condition based on collector status ***********/
+							if(setTimeout(function(){ gjkt.selectAll("circle").empty(); }, 5000) && setTimeout(function(){ gjkt.selectAll("rect").empty(); }, 5000)) 
+							{
+								/*if (collectormenu == "All Dest")
+								{
+									lbmextraction(projection, gjkt, "red")
+									subdistrictextraction(projection, gjkt, "blue")
+								}
+								if (collectormenu == "SubDistrict") 
+								{
+									subdistrictextraction(projection, gjkt, "blue")
+								}
+								if (collectormenu == "LBM")  
+								{
+									lbmextraction(projection, gjkt, "red")
+								}*/
+							}
 						})
                         .on("click", function(d){clicked(d,jww,jwh,gjw, path2, projection2, zoom2)});;
 					
@@ -1143,8 +1157,9 @@
 							var coordinates = [0, 0];
 								coordinates = d3.mouse(this);
 							var target = d3.select("#tooltip")
-									.style("left", coordinates[0] + "px")
-									.style("top", coordinates[1] + "px");
+									.style("left", 2*margin+"px")//coordinates[0] + "px")
+									.style("top", ((margin*9)+15)+"px")//coordinates[1] + "px")
+									.style("width", jktw-2*margin-5+"px");
 								target.select("#daerah")
 									.text("DEST LBM :"+d.name);
 
@@ -1257,8 +1272,9 @@
 							var coordinates = [0, 0];
 								coordinates = d3.mouse(this);
 							var target = d3.select("#tooltip")
-									.style("left", coordinates[0] + "px")
-									.style("top", coordinates[1] + "px");
+									.style("left", 2*margin+"px")//coordinates[0] + "px")
+									.style("top", ((margin*9)+15)+"px")//coordinates[1] + "px")
+									.style("width", jktw-2*margin-5+"px");
 								target.select("#daerah")
 									.text("DEST Subdistrict :"+d.subdistrict);
 
@@ -1486,36 +1502,62 @@
 			//create scale bar graph
 			function scalegraph()
 			{			
-				var scale = d3.scale.linear().domain([0, 100]).range([clisth, 0]),
-					axis = d3.svg.axis().scale(scale).ticks(10).orient("left");
+				var scale = d3.scale.linear().domain([50000, 0]).range([jktw-margin, margin]),
+					axis = d3.svg.axis().scale(scale).ticks(5).orient("botom");
 				clist.append("svg:rect")
-					.attr("fill", "url(#grad)")
-					.attr("x", 30)
-					.attr("width", 30)
-					.attr("height", clisth);//height - h2 - 5*margin);
+					.attr("fill", "url(#gradSD)")
+					.attr("x", margin)
+					.attr("y", margin)
+					.attr("width", jktw-2*margin)
+					.attr("height", margin);//height - h2 - 5*margin);
 				clist.append("svg:g")
-					.attr("transform", "translate(30,0)")
+					.attr("transform", "translate(0,2)")
 					.classed("axis", true)
 					.call(axis);
 				clist.append("svg:text")
 					.classed("expl", true)
-					.attr("transform", "translate(0," + (clisth + margin) + ")")
-					.text("% of total weekly volume of birds")
+					.attr("transform", "translate("+ (margin+2) +"," + (2*margin-5) + ")")
+					.text("Weekly Volume Subdistrict")
+				
+				clist.append("svg:rect")
+					.attr("fill", "url(#gradLBM)")
+					.attr("x", margin)
+					.attr("y", 2*margin+2)
+					.attr("width", jktw-2*margin)
+					.attr("height", margin);
+				clist.append("svg:text")
+					.classed("expl", true)
+					.attr("transform", "translate("+ (margin+2) +"," + (3*margin-5) + ")")
+					.text("Weekly Volume LBM")
 			
 				//add color on the bar    
 				var grad = defs.append("svg:linearGradient")
-					.attr("id", "grad")
-					.attr("x1", "100%")
+					.attr("id", "gradSD")
+					.attr("x1", "0%")
 					.attr("x2", "100%")
 					.attr("y1", "100%")
-					.attr("y2", "0%")
+					.attr("y2", "100%")
 					.attr("spreadMethod", "pad");
 				grad.append("svg:stop")
 					.attr("offset", "0%")
-					.attr("stop-color", "rgb(237,248,233)");
+					.attr("stop-color", "white");
 				grad.append("svg:stop")
 					.attr("offset", "100%")
-					.attr("stop-color", "rgb(0,109,44)");
+					.attr("stop-color", "blue");
+					
+				var grad2 = defs.append("svg:linearGradient")
+					.attr("id", "gradLBM")
+					.attr("x1", "0%")
+					.attr("x2", "100%")
+					.attr("y1", "100%")
+					.attr("y2", "100%")
+					.attr("spreadMethod", "pad");
+				grad2.append("svg:stop")
+					.attr("offset", "0%")
+					.attr("stop-color", "white");
+				grad2.append("svg:stop")
+					.attr("offset", "100%")
+					.attr("stop-color", "red");
 			}
 			
 			//load filter options
@@ -1857,11 +1899,12 @@
 				//reset data variable into original data
 				data = datadump;
 
-console.log(origin+", "+connector+", "+destination+", "+species+", "+connection);
+//console.log(origin+", "+connector+", "+destination+", "+species+", "+connection);
 				if (connector == "All Dest")
 				{
-					gjkt.selectAll("circle").remove(); 
+					
 					gjkt.selectAll("rect").remove();
+					gjkt.selectAll("circle").remove(); 
 					lbmextraction(projection, gjkt, "red")
 					subdistrictextraction(projection, gjkt, "blue")
 					
@@ -1936,7 +1979,7 @@ console.log([species])
             titleinterface()
             
             //added graph bar
-            //scalegraph()
+            scalegraph()
             
             //added filter(s)
             Filter1_Origins();
