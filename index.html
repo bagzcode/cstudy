@@ -17,7 +17,7 @@
 			  font-size: 18px;
 			}
 			text.expl {
-			  font-size: 16px;
+			  font-size: 11px;
 			}
 			text.title {
 			  font-size: 24px;
@@ -52,7 +52,6 @@
 
             #tooltip {
 			        position: absolute;
-			        height: auto;
 			        padding: 10px;
 			        background-color: white;
 			        -webkit-border-radius: 10px;
@@ -155,6 +154,7 @@
                     .domain([0, 100]);
             
             var margin = 25,
+            	marginforlegend = 10,
 				width = window.innerWidth - margin,
 				height = window.innerHeight - margin;
 				if (width < 1000) { width = 1000 }
@@ -179,37 +179,37 @@
 					.attr("transform", "translate("+margin+","+6*margin+")"),
 				clistw = 250,
 				clisth = 300,
-				jktx = 400,
-				jktw = (width-15*margin)/2,
-				jkth = jktw*3/4,
+				jktw = (width-15*margin),///2,
+				jkth = (height-8*margin)*5/8,//jktw*3/4,
+				jktx = width-jktw-15*margin,//400,
 				jww = width-15*margin,
-				jwh = height-5*margin,//height-jkth-5*margin,
-				clist = canvas.append("svg:g")
-					.attr("id", "clist")
-					.attr("width", clistw),
+				jwh = (height-8*margin)*3/8//height-7*margin,//height-jkth-5*margin,
 				label = canvas.append("svg:g")
 					.attr("id", "label")
 					.attr("transform", "translate("+clistw+",0)"),
 				map2 = canvas.append("svg:svg")
 					.attr("id", "map2")
 					.attr("x", 0)
-					.attr("y", 0)//jkth)
+					.attr("y", jkth)
 					.attr("width", jww)
 					.attr("height", jwh)
 					.append("svg:g"),
 				map = canvas.append("svg:svg")
 					.attr("id", "map")
-					.attr("x", width-jktw-15*margin)
+					.attr("x", 0)
 					.attr("width", jktw)
 					.attr("height", jkth)
 					.append("svg:g"),
+				clist = canvas.append("svg:g")
+					.attr("id", "clist")
+					.attr("width", clistw),
 					
 
             //Width and height for jabodetabek
             	
             	projection = d3.geo.mercator()
-                               .rotate([-106.2,5.9,0])
-    						   .scale(width*15)
+                               .rotate([-105.8,5.9,0])//([-106.2,5.9,0])
+    						   .scale(width*20)//(width*15)
                                .translate([0, 0]),                 
             	path = d3.geo.path().projection(projection),
             	
@@ -230,7 +230,7 @@
             
             //Width and height for java island   
             var projection2 = d3.geo.mercator()
-                                .rotate([-105,1.5,0])
+                                .rotate([-105,5.7,0])
     							.scale(width*4)
                                 .translate([0, 0]),                  
             	path2 = d3.geo.path().projection(projection2),
@@ -267,11 +267,31 @@
 				destinationmenu = "",//F3
 				speciesmenu = [],//F4
 				connectionmenu = "",//F5
-				filterwidth = 120;
+				filterwidth = 120,
+				widthbuble = 250,
+				heightbuble = 70,
+				leftbuble = width - 2.5*margin - widthbuble,
+				topbuble = 6*margin+8;
+				
 			
             var setNormalColor = function(d)
             {
                 //Get data value
+                  var value = d.properties.value;
+                  
+                    if (value) {
+                            //If value exists…
+                            return color(value);
+                    } else {
+                            //If value is undefined…
+                        	return "white";
+                    }
+            }
+            
+            var setJktColor = function(d)
+            {
+                //Get data value
+console.log(d)
                   var value = d.properties.value;
                   
                     if (value) {
@@ -372,7 +392,7 @@
 			}
 			
 			//function to print weekly volume information of the origin areas based on selected destination
-			var getInfo = function (d) 
+			var getInfo = function (d,selected) 
             {
 				var selrowdt = [],
 					info = "ORIGIN AREA (Weekly Volume) : ",
@@ -514,8 +534,27 @@
 						.attr("d", path)
 						.style("fill", setNormalColor)
 						.style("stroke", "rgb(0,109,44)")
-						.on("mouseover", function(d)
+						.on("click", function(d)
 						{
+							//replacement moveout
+							d3.select(this).style("fill", setNormalColor(d));
+							d3.select("#tooltip").classed("hidden", true);	//hide
+							
+							//remove selection on Java Map
+							map2.selectAll("path")
+							.style("fill", setNormalColor)
+							.attr("stroke-width", 1);
+							//end removal section
+							
+							//remove selection on Java Map
+							map.selectAll("path")
+							.style("fill", setNormalColor)
+							.attr("stroke-width", 1);
+							//end removal section
+							
+							d3.select("table").remove();
+							//end moveout
+							
 							//get the origin cities based on selected destination
 							var oricity = getOriginCity(d);
 							var dt = function(dest,ori) 
@@ -557,16 +596,17 @@
 								coordinates = d3.mouse(this);
 	
 							var target = d3.select("#tooltip")
-									.style("left", 2*margin+"px")//coordinates[0] + "px")
-									.style("top", ((margin*9)+15)+"px")//coordinates[1] + "px")
-									.style("width", jktw-2*margin-5+"px");
+									.style("left", leftbuble+"px")//coordinates[0] + "px")
+									.style("top", topbuble+"px")//coordinates[1] + "px")
+									.style("width", widthbuble+"px")
+									.style("height", heightbuble+"px");
 								target.select("#daerah")
 									.text("DESTINATION :"+d.properties.KAB_KOTA);
 
 								//target.select("#info")
 									//.text("Weekly Volume of Birds: " + d.properties.value + " (" + Math.round(d.properties.value)/1000 + " % )");
 									//.text(getInfo(d))
-								getInfo(d)								
+								getInfo(d,"district")								
 							
 							//Show tooltip
 							d3.select("#tooltip").classed("hidden", false);
@@ -575,7 +615,7 @@
 							var JavTable = tabulate(datamovjak, ["species","district_org_source",  "tot"]);
 								
 						})
-						.on("mouseout", function(d)
+						/*.on("mouseout", function(d)
 						{
 							d3.select(this).style("fill", setNormalColor(d));
 							d3.select("#tooltip").classed("hidden", true);	//hide
@@ -587,8 +627,8 @@
 							//end removal section
 							
 							d3.select("table").remove();
-						})
-						.on("click", function(d){clicked(d,jktw,jkth,gjkt, path, projection, zoom)});	
+						})*/
+						.on("dblclick", function(d){clicked(d,jktw,jkth,gjkt, path, projection, zoom)});	
 					
 				} else {
 					label.selectAll("text").remove();
@@ -618,10 +658,32 @@
                        .attr("d", path2)
                        .style("fill", setNormalColor)
                        .style("stroke", "rgb(0,109,44)")
-                       .on("mouseover", function(d)
+                       .on("click", function(d)
 						{
+							//replacement for moveout
+							d3.select(this).style("fill", setNormalColor(d));
+							d3.select("#tooltip").classed("hidden", true);
+							
+							//remove selection on Java Map
+								map.selectAll("path")
+								.style("fill", setNormalColor)
+								.attr("stroke-width", 1);
+								//end removal section
+								
+							//remove selection on Java Map
+								map2.selectAll("path")
+								.style("fill", setNormalColor)
+								.attr("stroke-width", 1);
+								//end removal section
+							
+							d3.select("table").remove();
 							gjkt.selectAll("circle").remove();
 							gjkt.selectAll("rect").remove();
+							
+						//end moveout
+							
+							//gjkt.selectAll("circle").remove();
+							//gjkt.selectAll("rect").remove();
 							
 /************************** generate position district **********************************/
 							if (destinationmenu == "District (D)" || destinationmenu == "D+SD" || destinationmenu == "D+LBM" || destinationmenu == "D+SD+LBM")
@@ -700,16 +762,31 @@
 										showCity(result,gjkt,possd,"blue", "circle");
 									
 										gjkt.selectAll("circle")
-										.on("mouseover", function(d) 
+										.on("click", function(d) 
 										{
 
+											// replacement for moveout
+											d3.select("#tooltip").classed("hidden", true);
+											//remove selection on Java Map
+											map2.selectAll("path")
+											.style("fill", setNormalColor)
+											.attr("stroke-width", 1);
+											//end removal section
+											
+											map.selectAll("path")
+											.style("fill", setNormalColor)
+											.attr("stroke-width", 1);
+											//end removal section
+											// end moveout
+											
 											clearTimeout(myVar);
 											var coordinates = [0, 0];
 												coordinates = d3.mouse(this);
 											var target = d3.select("#tooltip")
-													.style("left", 2*margin+"px")//coordinates[0] + "px")
-													.style("top", ((margin*9)+15)+"px")//coordinates[1] + "px")
-													.style("width", jktw-2*margin-5+"px");
+													.style("left", leftbuble+"px")//coordinates[0] + "px")
+													.style("top", topbuble+"px")//coordinates[1] + "px")
+													.style("width", widthbuble+"px")
+													.style("height", heightbuble+"px");
 												target.select("#daerah")
 													.text("DEST Subdistrict :"+d.subdistrict);
 
@@ -757,7 +834,7 @@
 											//end of generation
 							 
 										})
-										.on("mouseout", function(d)
+										/*.on("mouseout", function(d)
 										{	
 											d3.select("#tooltip").classed("hidden", true);
 											//remove selection on Java Map
@@ -765,7 +842,7 @@
 											.style("fill", setNormalColor)
 											.attr("stroke-width", 1);
 											//end removal section
-										});
+										});*/
 									})
 								
 								};
@@ -813,14 +890,30 @@
 										showCity(result,gjkt,poslbm,"red", "rect");
 									
 										gjkt.selectAll("rect")
-										.on("mouseover", function(d) 
+										.on("click", function(d) 
 										{
+											//replacement for moveout
+											d3.select("#tooltip").classed("hidden", true);
+											//remove selection on Java Map
+											map2.selectAll("path")
+											.style("fill", setNormalColor)
+											.attr("stroke-width", 1);
+											//end removal section
+											
+											//remove selection on Java Map
+											map.selectAll("path")
+											.style("fill", setNormalColor)
+											.attr("stroke-width", 1);
+											//end removal section
+											//end moveout
+											
 											var coordinates = [0, 0];
 												coordinates = d3.mouse(this);
 											var target = d3.select("#tooltip")
-													.style("left", 2*margin+"px")//coordinates[0] + "px")
-													.style("top", ((margin*9)+15)+"px")//coordinates[1] + "px")
-													.style("width", jktw-2*margin-5+"px");
+													.style("left", leftbuble+"px")//coordinates[0] + "px")
+													.style("top", topbuble+"px")//coordinates[1] + "px")
+													.style("width", widthbuble+"px")
+													.style("height", heightbuble+"px");
 												target.select("#daerah")
 													.text("DEST LBM :"+d.name);
 
@@ -867,7 +960,7 @@
 												.attr("stroke-width", 2);
 											//end of generation
 										})
-										.on("mouseout", function(d)
+										/*.on("mouseout", function(d)
 										{	
 											d3.select("#tooltip").classed("hidden", true);
 											//remove selection on Java Map
@@ -875,7 +968,7 @@
 											.style("fill", setNormalColor)
 											.attr("stroke-width", 1);
 											//end removal section
-										});
+										});*/
 									})
 								
 								};
@@ -888,9 +981,10 @@
 							var coordinates = [0, 0];
 								coordinates = d3.mouse(this);
 							var target = d3.select("#tooltip")
-								.style("left", 2*margin+"px")//coordinates[0] + "px")
-								.style("top", ((margin*9)+15)+"px")//coordinates[1] + "px")
-								.style("width", jktw-2*margin-5+"px");
+								.style("left", leftbuble+"px")//coordinates[0] + "px")
+								.style("top", topbuble+"px")//coordinates[1] + "px")
+								.style("width", widthbuble+"px")
+								.style("height", heightbuble+"px");
 
 							target.select("#daerah").text("Origin : "+d.properties.KABKOT+" - " + d.properties.PROVINSI);
 							//target.select("#info").text(getInfo2(d));
@@ -904,7 +998,7 @@
 
 
 						})
-                    	.on("mouseout", function(d)
+                    	/*.on("mouseout", function(d)
                     	{
 							
 							d3.select(this).style("fill", setNormalColor(d));
@@ -923,25 +1017,13 @@
 							//mySD = setTimeout(function(){ gjkt.selectAll("circle").remove(); }, 5000);
 							//myLBM = setTimeout(function(){gjkt.selectAll("rect").remove();}, 5000);
 							
-/************************** returning the condition based on collector status ***********/
+************************** returning the condition based on collector status ***********
 							if(setTimeout(function(){ gjkt.selectAll("circle").empty(); }, 5000) && setTimeout(function(){ gjkt.selectAll("rect").empty(); }, 5000)) 
 							{
-								/*if (collectormenu == "All Dest")
-								{
-									lbmextraction(projection, gjkt, "red")
-									subdistrictextraction(projection, gjkt, "blue")
-								}
-								if (collectormenu == "SubDistrict") 
-								{
-									subdistrictextraction(projection, gjkt, "blue")
-								}
-								if (collectormenu == "LBM")  
-								{
-									lbmextraction(projection, gjkt, "red")
-								}*/
+								
 							}
-						})
-                        .on("click", function(d){clicked(d,jww,jwh,gjw, path2, projection2, zoom2)});;
+						})*/
+                        .on("dblclick", function(d){clicked(d,jww,jwh,gjw, path2, projection2, zoom2)});;
 					
 				} else {
 					map2.selectAll("path")
@@ -1152,14 +1234,30 @@
 					showCity(lbms,shape,poslbm,citycolor,"rect");
 					
 					shape.selectAll("rect")
-						.on("mouseover", function(d) 
+						.on("click", function(d) 
 						{
+							//replacement for moveout
+							d3.select("#tooltip").classed("hidden", true);
+							//remove selection on Java Map
+							map2.selectAll("path")
+							.style("fill", setNormalColor)
+							.attr("stroke-width", 1);
+							//end removal section
+							
+							//remove selection on Java Map
+							map.selectAll("path")
+							.style("fill", setNormalColor)
+							.attr("stroke-width", 1);
+							//end removal section
+							// end moveout
+							
 							var coordinates = [0, 0];
 								coordinates = d3.mouse(this);
 							var target = d3.select("#tooltip")
-									.style("left", 2*margin+"px")//coordinates[0] + "px")
-									.style("top", ((margin*9)+15)+"px")//coordinates[1] + "px")
-									.style("width", jktw-2*margin-5+"px");
+									.style("left", leftbuble+"px")//coordinates[0] + "px")
+									.style("top", topbuble+"px")//coordinates[1] + "px")
+									.style("width", widthbuble+"px")
+									.style("height", heightbuble+"px");
 								target.select("#daerah")
 									.text("DEST LBM :"+d.name);
 
@@ -1206,7 +1304,7 @@
 								.attr("stroke-width", 2);
 							//end of generation
 						})
-						.on("mouseout", function(d)
+						/*.on("mouseout", function(d)
 						{	
 							d3.select("#tooltip").classed("hidden", true);
 							//remove selection on Java Map
@@ -1214,7 +1312,7 @@
 							.style("fill", setNormalColor)
 							.attr("stroke-width", 1);
 							//end removal section
-						});
+						});*/
 				});	
 			};
 			
@@ -1266,15 +1364,30 @@
 					
 				
 					shape.selectAll("circle")
-						.on("mouseover", function(d) 
+						.on("click", function(d) 
 						{
-
+							//replacement for moveout
+							d3.select("#tooltip").classed("hidden", true);
+							//remove selection on Java Map
+							map2.selectAll("path")
+							.style("fill", setNormalColor)
+							.attr("stroke-width", 1);
+							//end removal section
+							
+							//remove selection on Java Map
+							map.selectAll("path")
+							.style("fill", setNormalColor)
+							.attr("stroke-width", 1);
+							//end removal section
+							//end moveout
+							
 							var coordinates = [0, 0];
 								coordinates = d3.mouse(this);
 							var target = d3.select("#tooltip")
-									.style("left", 2*margin+"px")//coordinates[0] + "px")
-									.style("top", ((margin*9)+15)+"px")//coordinates[1] + "px")
-									.style("width", jktw-2*margin-5+"px");
+									.style("left", leftbuble+"px")//coordinates[0] + "px")
+									.style("top", topbuble+"px")//coordinates[1] + "px")
+									.style("width", widthbuble+"px")
+									.style("height", heightbuble+"px");
 								target.select("#daerah")
 									.text("DEST Subdistrict :"+d.subdistrict);
 
@@ -1322,7 +1435,7 @@
 							//end of generation
 							 
 						})
-						.on("mouseout", function(d)
+						/*.on("mouseout", function(d)
 						{	
 							d3.select("#tooltip").classed("hidden", true);
 							//remove selection on Java Map
@@ -1330,7 +1443,7 @@
 							.style("fill", setNormalColor)
 							.attr("stroke-width", 1);
 							//end removal section
-						});
+						});*/
 					});	
 			};
 			
@@ -1377,9 +1490,17 @@
 					showCity(cities,shape,pos,citycolor);
 					
 					shape.selectAll("circle")
-						.on("mouseover", function(d) 
+						.on("click", function(d) 
 						{
-
+							//replacement for moveout
+							//generate the circles
+							d3.json("Java_District.geojson", function(json) 
+							{
+								circles2.selectAll("circle").remove();
+								//districtextraction(json, positions2, projection2, circles2, "orange");
+							});
+							//end moveout
+							
 							getOriginCity(d);
 							
 							d3.csv("indonesia_java.csv", function(cities) 
@@ -1415,7 +1536,7 @@
 							});
 							 
 						})
-						.on("mouseout", function(d)
+						/*.on("mouseout", function(d)
 						{
 							//generate the circles
 							d3.json("Java_District.geojson", function(json) 
@@ -1423,7 +1544,7 @@
 								circles2.selectAll("circle").remove();
 								//districtextraction(json, positions2, projection2, circles2, "orange");
 							});
-						});
+						});*/
 					});	
 			};
 			
@@ -1431,8 +1552,8 @@
 			function tabulate(data, columns) 
 			{
 				var table = clist.append("foreignObject")
-					.attr("x", width - 4*margin -250)
-					.attr("y", 0)
+					.attr("x", width - 4*margin - 250)
+					.attr("y", 4*margin)
 					.attr("width", 250)
 					.attr("height",height-5*margin)
 				.append("xhtml:body")
@@ -1558,6 +1679,144 @@
 				grad2.append("svg:stop")
 					.attr("offset", "100%")
 					.attr("stop-color", "red");
+			}
+			
+			//create legend bar 
+			function legendinJava()
+			{			
+				clist.append("svg:rect")
+					.attr("fill", "#FF0000")
+					.attr("x", margin)
+					.attr("y", jkth+jwh-6*marginforlegend-8)
+					.attr("width", marginforlegend)
+					.attr("height", marginforlegend);//height - h2 - 5*margin);
+					
+				clist.append("svg:rect")
+					.attr("fill", "#FF7D7D")
+					.attr("x", margin)
+					.attr("y", jkth+jwh-5*marginforlegend-6)
+					.attr("width", marginforlegend)
+					.attr("height", marginforlegend);//height - h2 - 5*margin);
+					
+				clist.append("svg:rect")
+					.attr("fill", "#FFC400")
+					.attr("x", margin)
+					.attr("y", jkth+jwh-4*marginforlegend-4)
+					.attr("width", marginforlegend)
+					.attr("height", marginforlegend);//height - h2 - 5*margin);
+					
+				clist.append("svg:rect")
+					.attr("fill", "#FCDF7E")
+					.attr("x", margin)
+					.attr("y", jkth+jwh-3*marginforlegend-2)
+					.attr("width", marginforlegend)
+					.attr("height", marginforlegend);//height - h2 - 5*margin);
+					
+				clist.append("svg:rect")
+					.attr("fill", "#FFFFFF")
+					.attr("x", margin)
+					.attr("y", jkth+jwh-2*marginforlegend)
+					.attr("width", marginforlegend)
+					.attr("height", marginforlegend);//height - h2 - 5*margin);
+				
+				clist.append("svg:text")
+					.classed("expl", true)
+					.attr("transform", "translate("+(margin - 5)+","+(jkth+jwh-1*marginforlegend)+") rotate("+270+")")
+					.text("Weekly Volume")
+					
+				clist.append("svg:text")
+					.classed("expl", true)
+					.attr("transform", "translate("+ (2*margin-marginforlegend+5) +"," + (jkth+jwh-5*marginforlegend-10) + ")")
+					.text("31 - 40")
+					
+				clist.append("svg:text")
+					.classed("expl", true)
+					.attr("transform", "translate("+ (2*margin-marginforlegend+5) +"," + (jkth+jwh-4*marginforlegend-6) + ")")
+					.text("21 - 30")
+					
+				clist.append("svg:text")
+					.classed("expl", true)
+					.attr("transform", "translate("+ (2*margin-marginforlegend+5) +"," + (jkth+jwh-3*marginforlegend-4) + ")")
+					.text("11 - 20")
+					
+				clist.append("svg:text")
+					.classed("expl", true)
+					.attr("transform", "translate("+ (2*margin-marginforlegend+5) +"," + (jkth+jwh-2*marginforlegend-2) + ")")
+					.text("1 - 10")
+					
+				clist.append("svg:text")
+					.classed("expl", true)
+					.attr("transform", "translate("+ (2*margin-marginforlegend+5) +"," + (jkth+jwh-marginforlegend) + ")")
+					.text("0")
+			}
+			
+			function legendinJak()
+			{			
+				clist.append("svg:rect")
+					.attr("fill", "#0015FF")
+					.attr("x", jktx+margin)
+					.attr("y", jkth-5*marginforlegend-15)
+					.attr("width", marginforlegend)
+					.attr("height", marginforlegend);//height - h2 - 5*margin);
+					
+				clist.append("svg:rect")
+					.attr("fill", "#828CFF")
+					.attr("x", jktx+margin)
+					.attr("y", jkth-4*marginforlegend-13)
+					.attr("width", marginforlegend)
+					.attr("height", marginforlegend);//height - h2 - 5*margin);
+					
+				clist.append("svg:rect")
+					.attr("fill", "#00FF1E")
+					.attr("x", jktx+margin)
+					.attr("y", jkth-3*marginforlegend-11)
+					.attr("width", marginforlegend)
+					.attr("height", marginforlegend);//height - h2 - 5*margin);
+					
+				clist.append("svg:rect")
+					.attr("fill", "#7DFF8C")
+					.attr("x", jktx+margin)
+					.attr("y", jkth-2*marginforlegend-9)
+					.attr("width", marginforlegend)
+					.attr("height", marginforlegend);//height - h2 - 5*margin);
+					
+				clist.append("svg:rect")
+					.attr("fill", "#FFFFFF")
+					.attr("x", jktx+margin)
+					.attr("y", jkth-1*marginforlegend-7)
+					.attr("width", marginforlegend)
+					.attr("height", marginforlegend);//height - h2 - 5*margin);
+				
+				clist.append("svg:text")
+					.classed("expl", true)
+					.attr("transform", "translate("+(jktx+margin - 5)+","+(jkth-7)+") rotate("+270+")")
+					.text("Weekly Volume")
+					
+				clist.append("svg:text")
+					.classed("expl", true)
+					.attr("transform", "translate("+ (jktx+(2*margin-marginforlegend+5)) +"," + (jkth-4*marginforlegend-16) + ")")
+					.text("31 - 40")
+					
+				clist.append("svg:text")
+					.classed("expl", true)
+					.attr("transform", "translate("+ (jktx+(2*margin-marginforlegend+5)) +"," + (jkth-3*marginforlegend-12) + ")")
+					.text("21 - 30")
+					
+				clist.append("svg:text")
+					.classed("expl", true)
+					.attr("transform", "translate("+ (jktx+(2*margin-marginforlegend+5)) +"," + (jkth-2*marginforlegend-10) + ")")
+					.text("11 - 20")
+					
+				clist.append("svg:text")
+					.classed("expl", true)
+					.attr("transform", "translate("+ (jktx+(2*margin-marginforlegend+5)) +"," + (jkth-1*marginforlegend-8) + ")")
+					.text("1 - 10")
+					
+				clist.append("svg:text")
+					.classed("expl", true)
+					.attr("transform", "translate("+ (jktx+(2*margin-marginforlegend+5)) +"," + (jkth-7) + ")")
+					.text("0")	
+			
 			}
 			
 			//load filter options
@@ -1776,7 +2035,7 @@
 							.attr("multiple","multiple")
 							.attr("size",5) 
 							//.attr("style","width: 200px")
-							.attr("style","height: 100%")
+							//.attr("style","height: 100%")
 							.on("change", function () 
 							{ 
 								dispatch.specieschange(speciesById.get(this.value)); 
@@ -1979,7 +2238,9 @@ console.log([species])
             titleinterface()
             
             //added graph bar
-            scalegraph()
+            //scalegraph();
+            legendinJava();
+            legendinJak();
             
             //added filter(s)
             Filter1_Origins();
@@ -2007,7 +2268,18 @@ console.log([species])
 							return "translate(100," + ((i+1) * ch + 5) + ")";
 						})
 					.text(function(d) { return d.properties.KAB_KOTA; })
-					.on("mouseover", function(d) {
+					.on("click", function(d) {
+							//replacement moveout
+							d3.selectAll(".active").classed("active", false);
+							map.selectAll("path")
+								.style("fill", setNormalColor)
+								.style("stroke", "rgb(0,109,44)");
+							map2.selectAll("path")
+								.style("fill", setNormalColor)
+								.style("stroke", "rgb(0,109,44)");
+							label.selectAll("text").remove();
+							//end moveout
+							
 							d3.selectAll(".active").classed("active", false);
 							d3.select(d3.event.target).classed("active", true);
 							var check_kota = d.properties.KAB_KOTA;
