@@ -295,36 +295,38 @@
 					dvalue[i] = datvalue.tot;
 				})
 				
-				var maxval = d3.max(dvalue);
-				return maxval
+				var minmaxval = []
+				minmaxval[0] = d3.min(dvalue);
+				minmaxval[1] = d3.max(dvalue);
+				return minmaxval
 //console.log(maxval)
 				
 			}
 			
-			function deviderLegend(maxval,peta)
+			function deviderLegend(minmaxval,peta)
 			{
 				var legVal = []
-				for (var i = 1; i < 6; i++)
+				for (var i = 1; i < 5; i++)
 				{
-					legVal[6-i] = maxval - ((maxval/5)*i);
+					legVal[5-i] = Math.round(minmaxval[0]+((minmaxval[1]-minmaxval[0]) - (((minmaxval[1]-minmaxval[0])/5)*i)));
 				}
 				console.log(legVal)
 				if(peta == "JV" )
 				{
-					ljv1 = legVal[1]
-					ljv2 = legVal[1]+1+" - "+legVal[2];
-					ljv3 = legVal[2]+1+" - "+legVal[3];
-					ljv4 = legVal[3]+1+" - "+legVal[4];
-					ljv5 = legVal[4]+1+" - "+legVal[5];
+					d3.select("#lvj1").text("0");
+					d3.select("#ljv2").text(legVal[1]+" - "+legVal[2]);
+					d3.select("#ljv3").text(legVal[2]+1+" - "+legVal[3]);
+					d3.select("#ljv4").text(legVal[3]+1+" - "+legVal[4]);
+					d3.select("#ljv5").text(legVal[4]+1+" - "+minmaxval[1]);
 					
 				}
 				if(peta == "JKT")
 				{
-					ljkt1 = legVal[1]
-					ljkt2 = legVal[1]+1+" - "+legVal[2];
+					ljkt1 = "0"
+					ljkt2 = legVal[1]+" - "+legVal[2];
 					ljkt3 = legVal[2]+1+" - "+legVal[3];
 					ljkt4 = legVal[3]+1+" - "+legVal[4];
-					ljkt5 = legVal[4]+1+" - "+legVal[5];
+					ljkt5 = legVal[4]+1+" - "+minmaxval[1];
 				}
 			}
             
@@ -1754,26 +1756,31 @@ console.log(d)
 					
 				clist.append("svg:text")
 					.classed("expl", true)
+					.attr("id", "ljv5")
 					.attr("transform", "translate("+ (2*margin-marginforlegend+5) +"," + (jkth+jwh-5*marginforlegend-10) + ")")
 					.text("31 - 40")
 					
 				clist.append("svg:text")
 					.classed("expl", true)
+					.attr("id", "ljv4")
 					.attr("transform", "translate("+ (2*margin-marginforlegend+5) +"," + (jkth+jwh-4*marginforlegend-6) + ")")
 					.text("21 - 30")
 					
 				clist.append("svg:text")
 					.classed("expl", true)
+					.attr("id", "ljv3")
 					.attr("transform", "translate("+ (2*margin-marginforlegend+5) +"," + (jkth+jwh-3*marginforlegend-4) + ")")
 					.text("11 - 20")
 					
 				clist.append("svg:text")
 					.classed("expl", true)
+					.attr("id", "ljv2")
 					.attr("transform", "translate("+ (2*margin-marginforlegend+5) +"," + (jkth+jwh-2*marginforlegend-2) + ")")
 					.text("1 - 10")
 					
 				clist.append("svg:text")
 					.classed("expl", true)
+					.attr("id", "ljv1")
 					.attr("transform", "translate("+ (2*margin-marginforlegend+5) +"," + (jkth+jwh-marginforlegend) + ")")
 					.text("0")
 			}
