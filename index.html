@@ -98,7 +98,7 @@
 			}
 			
 			.background {
-			  fill: #fff;
+			  fill: none;
 			  pointer-events: all;
 			  stroke: #000;
 			  stroke-width : 2;
@@ -231,7 +231,7 @@
             //Width and height for java island   
             var projection2 = d3.geo.mercator()
                                 .rotate([-105,5.7,0])
-    							.scale(width*4)
+    						    .scale(width*3.8)
                                 .translate([0, 0]),                  
             	path2 = d3.geo.path().projection(projection2),
             
@@ -273,7 +273,61 @@
 				leftbuble = width - 2.5*margin - widthbuble,
 				topbuble = 6*margin+8;
 				
+			var ljv1 = "",
+				ljv2 = "",
+				ljv3 = "",
+				ljv4 = "",
+				ljv5 = "",
+				ljkt1 = "",
+				ljkt2 = "",
+				ljkt3 = "",
+				ljkt4 = "",
+				ljkt5 = "";	
+				
+			var ForDestFilter;
+			var DforDestFilter;			
 			
+			var getMaxTot = function (d)
+			{
+				dvalue = [];
+				d.forEach(function(datvalue,i) 
+				{
+					dvalue[i] = datvalue.tot;
+				})
+				
+				var maxval = d3.max(dvalue);
+				return maxval
+//console.log(maxval)
+				
+			}
+			
+			function deviderLegend(maxval,peta)
+			{
+				var legVal = []
+				for (var i = 1; i < 6; i++)
+				{
+					legVal[6-i] = maxval - ((maxval/5)*i);
+				}
+				console.log(legVal)
+				if(peta == "JV" )
+				{
+					ljv1 = legVal[1]
+					ljv2 = legVal[1]+1+" - "+legVal[2];
+					ljv3 = legVal[2]+1+" - "+legVal[3];
+					ljv4 = legVal[3]+1+" - "+legVal[4];
+					ljv5 = legVal[4]+1+" - "+legVal[5];
+					
+				}
+				if(peta == "JKT")
+				{
+					ljkt1 = legVal[1]
+					ljkt2 = legVal[1]+1+" - "+legVal[2];
+					ljkt3 = legVal[2]+1+" - "+legVal[3];
+					ljkt4 = legVal[3]+1+" - "+legVal[4];
+					ljkt5 = legVal[4]+1+" - "+legVal[5];
+				}
+			}
+            
             var setNormalColor = function(d)
             {
                 //Get data value
@@ -569,7 +623,7 @@ console.log(d)
 									 //Find the corresponding state inside the GeoJSON
 									for (var j = 0; j < dest.features.length; j++)
 									{
-										var jsonState = dest.features[j].properties.KABKOT;
+										var jsonState = dest.features[j].properties.KAB_KOTA;
 										if (dataState == jsonState ) {
 											result[n] = dest.features[j];
 											n = n + 1;
@@ -612,7 +666,7 @@ console.log(d)
 							d3.select("#tooltip").classed("hidden", false);
 							
 							//generate table info
-							var JavTable = tabulate(datamovjak, ["species","district_org_source",  "tot"]);
+							var JakTable = tabulate(datamovjak, ["species","district_org_source",  "tot"]);
 								
 						})
 						/*.on("mouseout", function(d)
@@ -661,6 +715,8 @@ console.log(d)
                        .on("click", function(d)
 						{
 							//replacement for moveout
+							ForDestFilter = d3.select(this);
+							DforDestFilter = d;
 							d3.select(this).style("fill", setNormalColor(d));
 							d3.select("#tooltip").classed("hidden", true);
 							
@@ -813,7 +869,7 @@ console.log(d)
 													 //Find the corresponding state inside the GeoJSON
 													for (var j = 0; j < dest.features.length; j++)
 													{
-														var jsonState = dest.features[j].properties.KABKOT;
+														var jsonState = dest.features[j].properties.KAB_KOTA;
 														if (dataState == jsonState ) {
 															result[n] = dest.features[j];
 															n = n + 1;
@@ -940,7 +996,7 @@ console.log(d)
 													 //Find the corresponding state inside the GeoJSON
 													for (var j = 0; j < dest.features.length; j++)
 													{
-														var jsonState = dest.features[j].properties.KABKOT;
+														var jsonState = dest.features[j].properties.KAB_KOTA;
 														if (dataState == jsonState ) {
 															result[n] = dest.features[j];
 															n = n + 1;
@@ -986,7 +1042,7 @@ console.log(d)
 								.style("width", widthbuble+"px")
 								.style("height", heightbuble+"px");
 
-							target.select("#daerah").text("Origin : "+d.properties.KABKOT+" - " + d.properties.PROVINSI);
+							target.select("#daerah").text("Origin : "+d.properties.KAB_KOTA+" - " + d.properties.PROVINSI);
 							//target.select("#info").text(getInfo2(d));
 							getInfo2(d);
 							//Show tooltip
@@ -994,6 +1050,8 @@ console.log(d)
 							
 /************************** generate table info *****************************************/
 							var JavTable = tabulate(datamovjav, ["species", "CY_district", "tot"]);
+							console.log(getMaxTot(datamovjav));
+							deviderLegend(getMaxTot(datamovjav),"JV")
 
 
 
@@ -1284,7 +1342,7 @@ console.log(d)
 									 //Find the corresponding state inside the GeoJSON
 									for (var j = 0; j < dest.features.length; j++)
 									{
-										var jsonState = dest.features[j].properties.KABKOT;
+										var jsonState = dest.features[j].properties.KAB_KOTA;
 										if (dataState == jsonState ) {
 											result[n] = dest.features[j];
 											n = n + 1;
@@ -1304,15 +1362,6 @@ console.log(d)
 								.attr("stroke-width", 2);
 							//end of generation
 						})
-						/*.on("mouseout", function(d)
-						{	
-							d3.select("#tooltip").classed("hidden", true);
-							//remove selection on Java Map
-							map2.selectAll("path")
-							.style("fill", setNormalColor)
-							.attr("stroke-width", 1);
-							//end removal section
-						});*/
 				});	
 			};
 			
@@ -1414,7 +1463,7 @@ console.log(d)
 									 //Find the corresponding state inside the GeoJSON
 									for (var j = 0; j < dest.features.length; j++)
 									{
-										var jsonState = dest.features[j].properties.KABKOT;
+										var jsonState = dest.features[j].properties.KAB_KOTA;
 										if (dataState == jsonState ) {
 											result[n] = dest.features[j];
 											n = n + 1;
@@ -1432,18 +1481,8 @@ console.log(d)
 									return d.properties.OBJECTID; })
 								.style("fill", "blue")//color(js.properties.value))
 								.attr("stroke-width", 2);
-							//end of generation
-							 
+							//end of generation 
 						})
-						/*.on("mouseout", function(d)
-						{	
-							d3.select("#tooltip").classed("hidden", true);
-							//remove selection on Java Map
-							map2.selectAll("path")
-							.style("fill", setNormalColor)
-							.attr("stroke-width", 1);
-							//end removal section
-						});*/
 					});	
 			};
 			
@@ -1494,7 +1533,7 @@ console.log(d)
 						{
 							//replacement for moveout
 							//generate the circles
-							d3.json("Java_District.geojson", function(json) 
+							d3.json("indonesia_districts_java_only.json", function(json) 
 							{
 								circles2.selectAll("circle").remove();
 								//districtextraction(json, positions2, projection2, circles2, "orange");
@@ -1525,26 +1564,15 @@ console.log(d)
 					
 				
 									//generate the circles
-									d3.json("Java_District.geojson", function(json) 
+									d3.json("indonesia_districts_java_only.json", function(json) 
 									{
 										circles2.selectAll("circle").remove();
 										//drawthecity(cities, circles2, positions2, "blue")
 										//districtextraction(json, positions2, projection2, circles2, "blue");
 										//showCity(cities, circles2, positions2, "blue")
 									});
-								
-							});
-							 
+							}); 
 						})
-						/*.on("mouseout", function(d)
-						{
-							//generate the circles
-							d3.json("Java_District.geojson", function(json) 
-							{
-								circles2.selectAll("circle").remove();
-								//districtextraction(json, positions2, projection2, circles2, "orange");
-							});
-						});*/
 					});	
 			};
 			
@@ -1931,7 +1959,7 @@ console.log(d)
 							collectormenu = val;
 						//}
 						// set new csv data based on filter from dropdownmenu1 value(ddm1value)
-						datafilter(originmenu, collectormenu, destinationmenu, speciesmenu, connectionmenu)
+						datafiltercollector(collectormenu)
 						
 
 					});
@@ -1991,7 +2019,7 @@ console.log(d)
 							destinationmenu = val;
 						//}
 						// set new csv data based on filter from dropdownmenu1 value(ddm1value)
-						datafilter(originmenu, collectormenu, destinationmenu, speciesmenu, connectionmenu)
+						datafilterdest(destinationmenu)
 					});
 				});
 				//end of drop down
@@ -2152,14 +2180,30 @@ console.log(d)
 				//end of drop down
 			}
 			
-			//function filter for species
-			function datafilter(origin, connector, destination, species, connection)
+			//function filter for collector
+			function datafiltercollector(collector)
 			{	
-				//reset data variable into original data
-				data = datadump;
-
-//console.log(origin+", "+connector+", "+destination+", "+species+", "+connection);
-				if (connector == "All Dest")
+				
+//console.log(origin+", "+collector+", "+destination+", "+species+", "+connection);
+				d3.select("#tooltip").classed("hidden", true);
+					
+				//remove selection on Java Map
+					map.selectAll("path")
+					.style("fill", setNormalColor)
+					.attr("stroke-width", 1);
+					//end removal section
+					
+				//remove selection on Java Map
+					map2.selectAll("path")
+					.style("fill", setNormalColor)
+					.attr("stroke-width", 1);
+					//end removal section
+				
+				d3.select("table").remove();
+				gjkt.selectAll("circle").remove();
+				gjkt.selectAll("rect").remove();
+				
+				if (collector == "All Dest")
 				{
 					
 					gjkt.selectAll("rect").remove();
@@ -2168,13 +2212,13 @@ console.log(d)
 					subdistrictextraction(projection, gjkt, "blue")
 					
 				}
-				else if (connector == "SubDistrict")
+				else if (collector == "SubDistrict")
 				{
 					gjkt.selectAll("circle").remove(); 
 					gjkt.selectAll("rect").remove();
 					subdistrictextraction(projection, gjkt, "blue")
 				}
-				else if (connector == "LBM")
+				else if (collector == "LBM")
 				{
 					gjkt.selectAll("circle").remove(); 
 					gjkt.selectAll("rect").remove();
@@ -2186,6 +2230,342 @@ console.log(d)
 					gjkt.selectAll("rect").remove();
 				}
 				
+				
+			}
+			
+			//function filter for destination
+			function datafilterdest(destination)
+			{	
+
+//console.log(origin+", "+collector+", "+destination+", "+species+", "+connection);
+				
+//console.log(ForDestFilter)
+				if (typeof ForDestFilter != 'undefined')
+				{
+				
+					//replacement for moveout
+					ForDestFilter.style("fill", setNormalColor(DforDestFilter));
+					d3.select("#tooltip").classed("hidden", true);
+					
+					//remove selection on Java Map
+						map.selectAll("path")
+						.style("fill", setNormalColor)
+						.attr("stroke-width", 1);
+						//end removal section
+						
+					//remove selection on Java Map
+						map2.selectAll("path")
+						.style("fill", setNormalColor)
+						.attr("stroke-width", 1);
+						//end removal section
+					
+					d3.select("table").remove();
+					gjkt.selectAll("circle").remove();
+					gjkt.selectAll("rect").remove();
+					
+				//end moveout
+					
+					
+/************************** generate position district **********************************/
+					if (destination == "District (D)" || destination == "D+SD" || destination == "D+LBM" || destination == "D+SD+LBM")
+					{
+						//get the origin cities based on selected destination
+						var destcity = getDestCity(DforDestFilter, "district");
+						var dt = function(ori, dest) 
+						{
+
+							var result = [];
+							var n = 0;
+							for (var i = 0; i < dest.length; i++)
+							{
+
+								 var dataState = dest[i];
+								 //Find the corresponding state inside the GeoJSON
+								for (var j = 0; j < ori.features.length; j++)
+								{
+									var jsonState = ori.features[j].properties.KAB_KOTA;
+									if (dataState == jsonState ) {
+										result[n] = ori.features[j];
+										n = n + 1;
+										break;
+									}
+								}
+							}
+							return result
+						}; 
+						var dataselectedD = dt(jakjson, destcity); 
+
+						map.selectAll("path")
+							.data(dataselectedD, function(d) { return d.properties.OBJECTID; })
+							.style("fill", "purple")//color(js.properties.value))
+							.attr("stroke-width", 2);
+					}
+					
+/************************** generate position subdistrict *******************************/
+					if (destination == "SubDistrict (SD)" || destination == "D+SD" || destination == "SD+LBM" || destination == "D+SD+LBM")
+					{
+						var destsd = getDestCity(DforDestFilter, "subdistrict");
+						var dtsd = function(datassd) 
+						{
+
+							d3.csv("dest1dki.csv", function(sds)
+							{
+								var result = [];
+								var n = 0;
+								var possd = [];
+								for (var i = 0; i < datassd.length; i++)
+								{
+
+									 var dataState = datassd[i];
+									 //Find the corresponding state inside the GeoJSON
+									for (var j = 0; j < sds.length; j++)
+									{
+										var jsonState = sds[j].subdistrict;
+										if (dataState == jsonState ) {
+											result[n] = sds[j];
+											var Lat = (-1*sds[j].gps_north_degree) - (+sds[j].gps_north_minute/100),
+											Long = (1*sds[j].gps_east_degree) + (+sds[j].gps_east_minute/100),
+											location = [+Long, +Lat];
+											sds[j].location = location;
+											possd.push(projection(location));
+											n = n + 1;
+											break;
+										}
+									}
+								}
+								var g = gjkt.selectAll("g")
+								.data(result)
+								//.enter()
+								.append("svg:g");
+			
+
+								//generate the circles
+								showCity(result,gjkt,possd,"blue", "circle");
+							
+								gjkt.selectAll("circle")
+								.on("click", function(d) 
+								{
+
+									// replacement for moveout
+									d3.select("#tooltip").classed("hidden", true);
+									//remove selection on Java Map
+									map2.selectAll("path")
+									.style("fill", setNormalColor)
+									.attr("stroke-width", 1);
+									//end removal section
+									
+									map.selectAll("path")
+									.style("fill", setNormalColor)
+									.attr("stroke-width", 1);
+									//end removal section
+									// end moveout
+									
+									clearTimeout(myVar);
+									var coordinates = [0, 0];
+										coordinates = d3.mouse(this);
+									var target = d3.select("#tooltip")
+											.style("left", leftbuble+"px")//coordinates[0] + "px")
+											.style("top", topbuble+"px")//coordinates[1] + "px")
+											.style("width", widthbuble+"px")
+											.style("height", heightbuble+"px");
+										target.select("#daerah")
+											.text("DEST Subdistrict :"+d.subdistrict);
+
+										target.select("#info")
+											.text("location: " + d.location );
+											//.text(getInfo(d))
+													
+					
+									//Show tooltip
+									d3.select("#tooltip").classed("hidden", false);
+					
+					
+									//get the origin cities based on selected destination
+									var oricity = getOriginCity(d);
+									var dt = function(dest,ori) 
+									{
+
+										var result = [];
+										var n = 0;
+										for (var i = 0; i < ori.length; i++)
+										{
+
+											 var dataState = ori[i];
+											 //Find the corresponding state inside the GeoJSON
+											for (var j = 0; j < dest.features.length; j++)
+											{
+												var jsonState = dest.features[j].properties.KAB_KOTA;
+												if (dataState == jsonState ) {
+													result[n] = dest.features[j];
+													n = n + 1;
+													break;
+												}
+											}
+										}
+										return result
+									}; 
+					
+									//generate all selected origin city on Java Map
+									dt_res = dt(javjson,oricity); 
+									map2.selectAll("path")
+										.data(dt_res, function(d) { 
+											return d.properties.OBJECTID; })
+										.style("fill", "blue")//color(js.properties.value))
+										.attr("stroke-width", 2);
+									//end of generation
+					 
+								})
+							})
+						
+						};
+						var dataselectedsd = dtsd(destsd);
+					}
+/************************** generate position LBM ***************************************/
+					if (destination == "LBM" || destination == "D+LBM" || destination == "SD+LBM" || destination == "D+SD+LBM")
+					{
+						var destlbm = getDestCity(DforDestFilter, "lbm");
+						var dtlbm = function(dataslbm) 
+						{
+
+							d3.csv("dest2lbm.csv", function(lbms)
+							{
+								var result = [];
+								var n = 0;
+								var poslbm = [];
+								for (var i = 0; i < dataslbm.length; i++)
+								{
+
+									 var dataState = dataslbm[i];
+									 //Find the corresponding state inside the GeoJSON
+									for (var j = 0; j < lbms.length; j++)
+									{
+										var jsonState = lbms[j].marketCode;
+										if (dataState == jsonState ) {
+											result[n] = lbms[j];
+											var Lat = (-1*lbms[j].LS_Coord_Deg) - (+lbms[j].LS_Coord_Min/100),
+												Long = (1*lbms[j].BT_Coord_Deg) + (+lbms[j].BT_Coord_Min/100),
+											location = [+Long, +Lat];
+											lbms[j].location = location;
+											poslbm.push(projection(location));
+											n = n + 1;
+											break;
+										}
+									}
+								}
+								var g = gjkt.selectAll("g")
+								.data(result)
+								//.enter()
+								.append("svg:g");
+			
+
+								//generate the circles
+								showCity(result,gjkt,poslbm,"red", "rect");
+							
+								gjkt.selectAll("rect")
+								.on("click", function(d) 
+								{
+									//replacement for moveout
+									d3.select("#tooltip").classed("hidden", true);
+									//remove selection on Java Map
+									map2.selectAll("path")
+									.style("fill", setNormalColor)
+									.attr("stroke-width", 1);
+									//end removal section
+									
+									//remove selection on Java Map
+									map.selectAll("path")
+									.style("fill", setNormalColor)
+									.attr("stroke-width", 1);
+									//end removal section
+									//end moveout
+									
+									var coordinates = [0, 0];
+										coordinates = d3.mouse(this);
+									var target = d3.select("#tooltip")
+											.style("left", leftbuble+"px")//coordinates[0] + "px")
+											.style("top", topbuble+"px")//coordinates[1] + "px")
+											.style("width", widthbuble+"px")
+											.style("height", heightbuble+"px");
+										target.select("#daerah")
+											.text("DEST LBM :"+d.name);
+
+										target.select("#info")
+											.text("location: " + d.location );
+											//.text(getInfo(d))
+													
+					
+									//Show tooltip
+									d3.select("#tooltip").classed("hidden", false);
+					
+									//get the origin cities based on selected destination
+									var selecteddata = getDistrictBasedOnMarketCode(DforDestFilter);
+									var oricity = getOriginCity(selecteddata);
+									var dt = function(dest,ori) 
+									{
+
+										var result = [];
+										var n = 0;
+										for (var i = 0; i < ori.length; i++)
+										{
+
+											 var dataState = ori[i];
+											 //Find the corresponding state inside the GeoJSON
+											for (var j = 0; j < dest.features.length; j++)
+											{
+												var jsonState = dest.features[j].properties.KAB_KOTA;
+												if (dataState == jsonState ) {
+													result[n] = dest.features[j];
+													n = n + 1;
+													break;
+												}
+											}
+										}
+										return result
+									}; 
+					
+									//generate all selected origin city on Java Map
+									dt_res = dt(javjson,oricity); 
+									map2.selectAll("path")
+										.data(dt_res, function(d) { 
+											return d.properties.OBJECTID; })
+										.style("fill", "red")//color(js.properties.value))
+										.attr("stroke-width", 2);
+									//end of generation
+								})
+							})
+						
+						};
+						var dataselectedlbm = dtlbm(destlbm);
+					}
+					
+/************************** generate select-self district position and Bubble text ******/									
+					ForDestFilter.style("fill", "purple");
+			
+					var target = d3.select("#tooltip")
+						.style("left", leftbuble+"px")//coordinates[0] + "px")
+						.style("top", topbuble+"px")//coordinates[1] + "px")
+						.style("width", widthbuble+"px")
+						.style("height", heightbuble+"px");
+
+					target.select("#daerah").text("Origin : "+DforDestFilter.properties.KAB_KOTA+" - " + DforDestFilter.properties.PROVINSI);
+					//target.select("#info").text(getInfo2(d));
+					getInfo2(DforDestFilter);
+					//Show tooltip
+					d3.select("#tooltip").classed("hidden", false);
+					
+/************************** generate table info *****************************************/
+					var JavTable = tabulate(datamovjav, ["species", "CY_district", "tot"]);
+					console.log(getMaxTot(datamovjav));
+					deviderLegend(getMaxTot(datamovjav),"JV")
+				}
+			}
+			
+			//function filter for species
+			function datafilter(origin, collector, destination, species, connection)
+			{	
+				//reset data variable into original data
+				data = datadump;
+								
 				if (species.length != 0)
 				{
 					var datafilter = [];
@@ -2206,7 +2586,7 @@ console.log(d)
 					}
 						
 					data = datafilter;
-console.log([species])
+//console.log([species])
 				}
 				
 				
@@ -2286,7 +2666,7 @@ console.log([species])
 
 							updateMapJKT(d);
 							updateMapJAVA(javjson.features.filter(function(d, i) {
-								return d.properties.KABKOT == check_kota;})); 	
+								return d.properties.KAB_KOTA == check_kota;})); 	
 						})
 					.on("mouseout", function(d){
 							d3.selectAll(".active").classed("active", false);
@@ -2326,7 +2706,7 @@ console.log([species])
             });
                    
         	// generate SVG for second Geojson MAP (java island)  
-			d3.json("Java_District.geojson", function(json) {
+			d3.json("indonesia_districts_java_only.json", function(json) {
 			
 				/*
 				//assigned long and lat oh java district based on centroid  
@@ -2337,21 +2717,23 @@ console.log([species])
 					json.features[i].properties.longitude = (translate[0]-centroid_value[0]-(jww/2));
 					json.features[i].properties.latitude = (translate[1]-centroid_value[1]-(jwh/2));
 
-					if (json.features[i].properties.KABKOT == "JAKARTA UTARA")
+					if (json.features[i].properties.KAB_KOTA == "JAKARTA UTARA")
 					{
 					
 					}	 
 				}
 				*/
 			
-				//showCity (json, circles2, posit , "brown")		
-				//districtextraction(json, positions2, projection2, circles2, "orange");
-				//subdistrictextraction(projection2, gjw, "blue");
+				
 				javjson = json;  
              	updateMapJAVA(json);
+             	
+             	
 	
 				
             });
+            
+            
 
 /****************************************************************************************/
                         
