@@ -137,6 +137,40 @@
 				background-color: #EAF2D3;
 			}
 			
+			table {
+			  font-family: "Helvetica", "Lucida Sans", "Lucida Sans Unicode", "Luxi Sans", Tahoma, sans-serif;
+			  box-shadow: 1px 1px 10px rgba(0,0,0,0.5);
+			  border-collapse: collapse;
+			  border-spacing: 0;
+			}
+			table {
+			  margin: auto;
+			}
+			table, td, th {
+			  width: 100%;
+			  padding: 7px;
+			  text-align: center;
+			  border: 1px solid rgb(8,48,107);
+			}
+			th {
+			  background-color: rgb(8,81,156);
+			  color: white;
+			}
+			
+			.outer {
+				width: 300px;
+				height: 500px;
+				overflow: auto;
+			}
+			.inner {
+				width: 300px;
+				height: 500px;
+			}
+			#InfoTab{
+				display: block;
+				
+			}
+			
         </style>
     </head>
     <body>
@@ -560,6 +594,31 @@ console.log(d)
 				}
                 
                 return info; 
+					
+			}
+			
+			var getInfo3 = function (d) 
+            {
+				areaselected = d.Name || d.properties.KAB_KOTA || d.properties.KABKOT;
+				
+				//return data with selected origin selection
+				var databasedonorigin = data.filter(function(d)
+					{
+						return d.district_org_source == areaselected;
+					})
+//console.log(databasedonorigin)
+				
+				var datafilterbydistrictandspecies = d3.nest()
+					.key(function(d){ return d.species })
+					.key(function(d){ return d.CY_district })
+					.rollup(function(d)
+						{
+							return d3.sum(d, function (g){ return g.weekly_volume});
+						})
+					.entries(databasedonorigin)
+console.log(datafilterbydistrictandspecies)
+				datamovjav=datafilterbydistrictandspecies;
+				
 					
 			}
 			
@@ -1044,17 +1103,21 @@ console.log(d)
 								.style("width", widthbuble+"px")
 								.style("height", heightbuble+"px");
 
-							target.select("#daerah").text("Origin : "+d.properties.KAB_KOTA+" - " + d.properties.PROVINSI);
+							target.select("#daerah").text("Origin : "+d.properties.KAB_KOTA+" - " + d.properties.PROPINSI);
 							//target.select("#info").text(getInfo2(d));
-							getInfo2(d);
+							//getInfo2(d);
+getInfo3(d);
+//console.log(d)
 							//Show tooltip
 							d3.select("#tooltip").classed("hidden", false);
 							
 /************************** generate table info *****************************************/
-							var JavTable = tabulate(datamovjav, ["species", "CY_district", "tot"]);
-							console.log(getMaxTot(datamovjav));
-							deviderLegend(getMaxTot(datamovjav),"JV")
-
+							//var JavTable = tabulate(datamovjav, ["key", "values", "values"]);
+							var JavTable = tabulate2(datamovjav);
+							//console.log(getMaxTot(datamovjav));
+							//deviderLegend(getMaxTot(datamovjav),"JV")
+							
+						
 
 
 						})
@@ -1627,6 +1690,29 @@ console.log(d)
 					.attr("style", "font-family: Courier") // sets the font style
 						.html(function(d) { return d.value; });
 	
+				return table;
+			}
+			
+			
+			// The table generation function
+			function tabulate2(data) 
+			{
+				var table = clist.append("foreignObject")
+								.attr("x", width - 3*margin - 250)
+								.attr("y", 10*margin)
+								.attr("width", 250)
+								.attr("height",height-5*margin)
+								.append("xhtml:body")
+								.append("div")
+								.attr("class", "outer")
+								.append("div")
+								.attr("class", "inner")
+								.append("div")
+								.attr("id", "InfoTab")
+								.selectAll("table")
+								.data([data])
+								.enter().append("table")
+								.call(recurse);
 				return table;
 			}
 			
@@ -2243,10 +2329,6 @@ console.log(d)
 			//function filter for destination
 			function datafilterdest(destination)
 			{	
-
-//console.log(origin+", "+collector+", "+destination+", "+species+", "+connection);
-				
-//console.log(ForDestFilter)
 				if (typeof ForDestFilter != 'undefined')
 				{
 				
@@ -2554,14 +2636,14 @@ console.log(d)
 						.style("width", widthbuble+"px")
 						.style("height", heightbuble+"px");
 
-					target.select("#daerah").text("Origin : "+DforDestFilter.properties.KAB_KOTA+" - " + DforDestFilter.properties.PROVINSI);
+					target.select("#daerah").text("Origin : "+DforDestFilter.properties.KAB_KOTA+" - " + DforDestFilter.properties.PROPINSI);
 					//target.select("#info").text(getInfo2(d));
-					getInfo2(DforDestFilter);
+					getInfo3(DforDestFilter);
 					//Show tooltip
 					d3.select("#tooltip").classed("hidden", false);
 					
 /************************** generate table info *****************************************/
-					var JavTable = tabulate(datamovjav, ["species", "CY_district", "tot"]);
+					var JavTable = tabulate2(datamovjav);
 					console.log(getMaxTot(datamovjav));
 					deviderLegend(getMaxTot(datamovjav),"JV")
 				}
@@ -2593,6 +2675,17 @@ console.log(d)
 					}
 						
 					data = datafilter;
+					
+					if (typeof DforDestFilter != 'undefined')
+					{	
+						d3.select("table").remove();
+console.log(DforDestFilter)
+						getInfo3(DforDestFilter);
+						var JavTable = tabulate2(datamovjav);
+						//var JavTable = tabulate(datamovjav, ["species", "CY_district", "tot"]);
+					}
+					
+					
 //console.log([species])
 				}
 				
@@ -2739,6 +2832,55 @@ console.log(d)
 	
 				
             });
+            
+            
+            
+			function recurse(sel) {
+			  // sel is a d3.selection of one or more empty tables
+			  sel.each(function(d) {
+				// d is an array of objects
+				var colnames,
+					tds,
+					table = d3.select(this);
+
+				// obtain column names by gathering unique key names in all 1st level objects
+				// following method emulates a set by using the keys of a d3.map()
+				colnames = d                                                          // array of objects
+					.reduce(function(p,c) { return p.concat(d3.keys(c)); }, [])       // array with all keynames
+					.reduce(function(p,c) { return (p.set(c,0), p); }, d3.map())      // map with unique keynames as keys
+					.keys();                                                          // array with unique keynames (arb. order)
+
+				// colnames array is in arbitrary order
+				// sort colnames here if required
+console.log(colnames)
+				// create header row using standard 1D data join and enter()
+				table.append("thead").append("tr").selectAll("th")
+					.data(colnames)
+				  .enter().append("th")
+					.text(function(d) { return d; });
+
+				// create the table cells by using nested 2D data join and enter()
+				// see also http://bost.ocks.org/mike/nest/
+				tds = table.append("tbody").selectAll("tr")
+					.data(d)                            // each row gets one object
+				  .enter().append("tr").selectAll("td")
+					.data(function(d) {                 // each cell gets one value
+					  return colnames.map(function(k) { // for each colname (i.e. key) find the corresponding value
+						return d[k] || "";              // use empty string if key doesn't exist for that object
+					  });
+					})
+				  .enter().append("td");
+
+				// cell contents depends on the data bound to the cell
+				// fill with text if data is not an Array
+				tds.filter(function(d) { return !(d instanceof Array); })
+					.text(function(d) { return d; });
+				// fill with a new table if data is an Array
+				tds.filter(function(d) { return (d instanceof Array); })
+					.append("table")
+					.call(recurse);
+			  });
+			}
             
             
 
