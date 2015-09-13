@@ -474,6 +474,31 @@
 				
 				
 			}
+			
+			var getInfoDestfromOri2 = function (d) 
+            {
+				areaselected = d.Name || d.properties.KAB_KOTA || d.properties.KABKOT;
+				
+				//return data with selected origin selection
+				var databasedonorigin = data.filter(function(d)
+					{
+						return d.district_org_source == areaselected;
+					})
+				
+				var datafilterbydistrictandspecies = d3.nest()
+					.key(function(d){ return d.CY_district })
+					.key(function(d){ return d.species })
+					.rollup(function(d)
+						{
+							return d3.sum(d, function (g){ return g.weekly_volume});
+						})
+					.entries(databasedonorigin)
+				datamovjav=datafilterbydistrictandspecies;	
+				
+console.log(datamovjav)		
+
+			}
+
 
 /******************************** F U N C T I O N S ********************************/				
 			function getcsvdata()
@@ -959,18 +984,22 @@
 
 							target.select("#daerah").text("Origin : "+d.properties.KAB_KOTA+" - " + d.properties.PROPINSI);
 							//target.select("#info").text(getInfo2(d));
-							//getInfo2(d);
-getInfoDestfromOri(d);
+	
+							getInfoDestfromOri2(d);
 //console.log(d)
 							//Show tooltip
 							d3.select("#tooltip").classed("hidden", false);
 							
 /************************** generate table info *****************************************/
 							//var JavTable = tabulate(datamovjav, ["key", "values", "values"]);// to generate non-nested tabel
-							var datamovjavconvert = DataConverter(datamovjav,"ori_to_dest","district");	
-							var JavTable = tabulate2(datamovjavconvert);
+							var datamovjavconvert = DataConverter2(datamovjav,"ori_to_dest","district");	
+							var datamovjavconvertaddtot = addTotalField(datamovjavconvert);
+							var totalsend = addTotalSendOrReceive(datamovjavconvert);
+							target.select("#info").text("Total weekly to All destinations (detail below) : "+totalsend);
+							var JavTable = tabulate2(datamovjavconvertaddtot);
 							
-							
+							/*
+							// function for looking min max based on dest and species
 							minmaxvaljkt[1] = d3.max(d3.entries(datamovjavconvert), function(d) {
 							  return d3.max(d3.entries(d.value), function(e) {
 								  return d3.max(e.value, function(f) { return f.tot_week_vol; });
@@ -987,7 +1016,7 @@ console.log(minmaxvaljkt)
 							
 							deviderLegend(minmaxvaljkt,"JKT")
 							
-							
+							*/
 							
 							
 							
@@ -2451,13 +2480,14 @@ console.log(minmaxvaljkt)
 
 					target.select("#daerah").text("Origin : "+DvalueForFilter.properties.KAB_KOTA+" - " + DvalueForFilter.properties.PROPINSI);
 					//target.select("#info").text(getInfo2(d));
-					getInfoDestfromOri(DvalueForFilter);
+					getInfoDestfromOri2(DvalueForFilter);
 					//Show tooltip
 					d3.select("#tooltip").classed("hidden", false);
 					
 /************************** generate table info *****************************************/
-					var datamovjavconvert = DataConverter(datamovjav,"ori_to_dest","district");	
-					var JavTable = tabulate2(datamovjavconvert);
+					var datamovjavconvert = DataConverter2(datamovjav,"ori_to_dest","district");	
+					var datamovjavconvertaddtot = addTotalField(datamovjavconvert);
+					var JavTable = tabulate2(datamovjavconvertaddtot);
 					deviderLegend(minmaxvaljv,"JV")
 					
 					
@@ -2495,9 +2525,10 @@ console.log(minmaxvaljkt)
 					{	
 						d3.select("table").remove();
 
-						getInfoDestfromOri(DvalueForFilter);
-						var datamovjavconvert = DataConverter(datamovjav,"ori_to_dest","district");	
-						var JavTable = tabulate2(datamovjavconvert);
+						getInfoDestfromOri2(DvalueForFilter);
+						var datamovjavconvert = DataConverter2(datamovjav,"ori_to_dest","district");	
+						var datamovjavconvertaddtot = addTotalField(datamovjavconvert);
+						var JavTable = tabulate2(datamovjavconvertaddtot);
 						//var JavTable = tabulate(datamovjav, ["species", "CY_district", "tot"]); //to display non-nested tabel
 					}
 					
@@ -2549,8 +2580,10 @@ console.log(minmaxvaljkt)
 						{ 
 							if (d == "species"){d = "Species"}
 							if (d == "dest_and_tot"){d = "Destination and Total"}
+							if (d == "spec_and_tot"){d = "Detail"}
 							if (d == "dest"){d = "Destination"}
-							if (d == "tot_week_vol"){d = "Total Weekly Volume"}
+							if (d == "tot_week_vol"){d = "Weekly Volume"}
+							if (d == "total"){d = "Total Weekly Volume"}
 		
 							return d; 
 						});
@@ -2603,6 +2636,27 @@ console.log(minmaxvaljkt)
 				return dataori;
 			}
 			
+			//function to convert the "key" and "values"
+			function DataConverter2 (dataori,type,model)//type = {"ori to dest", "dest to ori"}| model = {"district","subdistrict","LBM"}
+			{
+				for (var i = 0; i < dataori.length; i++)
+
+				{
+					dataori[i].dest = dataori[i].key;
+					dataori[i].spec_and_tot = dataori[i].values;
+					for (var j = 0; j < dataori[i].values.length; j++)
+					{
+						dataori[i].spec_and_tot[j].species = dataori[i].values[j].key;
+						dataori[i].spec_and_tot[j].tot_week_vol = dataori[i].values[j].values;
+						delete 	dataori[i].values[j].key;
+						delete dataori[i].values[j].values;
+					}
+					delete dataori[i].key;
+					delete dataori[i].values;
+				};
+				return dataori;
+			}
+			
 			function deviderLegend(minmaxval,peta)
 			{
 				var legVal = []
@@ -2630,7 +2684,32 @@ console.log(minmaxval)
 				}
 			}
 
+            function addTotalField(data)
+            {
+            	for (var i = 0; i < data.length; i++)
+				{
+					var total = 0;
+					for (var j = 0; j < data[i].spec_and_tot.length; j++)
+					{
+						total = total + data[i].spec_and_tot[j].tot_week_vol;
+					}
+					data[i].total = total
+				}
+				return data;
+            }
             
+            function addTotalSendOrReceive(data)
+            {
+            	var total = 0;
+            	for (var i = 0; i < data.length; i++)
+				{	
+					for (var j = 0; j < data[i].spec_and_tot.length; j++)
+					{
+						total = total + data[i].spec_and_tot[j].tot_week_vol;
+					}
+				}
+				return total;
+            }
 /****************************************************************************************/
             //set the interface
             
