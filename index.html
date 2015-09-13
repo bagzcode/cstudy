@@ -182,11 +182,6 @@
         <script type="text/javascript">
         
         //var global
-            var color = d3.scale.quantize()
-                    .range(["rgb(237,248,233)", "rgb(186,228,179)",
-                     "rgb(116,196,118)", "rgb(49,163,84)","rgb(0,109,44)"])
-                    .domain([0, 100]);
-            
             var margin = 25,
             	marginforlegend = 10,
 				width = window.innerWidth - margin,
@@ -194,13 +189,19 @@
 				if (width < 1000) { width = 1000 }
 				if (height < 800) { height = 800 }
 			
-			var	cscale = d3.scale.linear().domain([0, 1])
-                		.range(["#fae893", "#756518"]),
-				proj = d3.geo.equirectangular()
-							.scale(1)
-							.translate([0,0]),
-				path = d3.geo.path().projection(proj),
-				wscale = 0,
+			var	clistw = 250,
+				clisth = 300,
+				jktw = (width-15*margin),///2,
+				jkth = (height-8*margin)*5/8,//jktw*3/4,
+				jktx = width-jktw-15*margin,//400,
+				jww = width-15*margin,
+				jwh = (height-8*margin)*3/8//height-7*margin,//height-jkth-5*margin,
+				filterwidth = 120,
+				widthbuble = 250,
+				heightbuble = 70,
+				leftbuble = width - 2.5*margin - widthbuble,
+				topbuble = 6*margin+8,
+				
 				svg = d3.select("body")
 					.append("svg:svg")
 					.attr("height", height)
@@ -211,13 +212,6 @@
 					.attr("id", "canvas")
 					.attr("height", height - 5*margin)
 					.attr("transform", "translate("+margin+","+6*margin+")"),
-				clistw = 250,
-				clisth = 300,
-				jktw = (width-15*margin),///2,
-				jkth = (height-8*margin)*5/8,//jktw*3/4,
-				jktx = width-jktw-15*margin,//400,
-				jww = width-15*margin,
-				jwh = (height-8*margin)*3/8//height-7*margin,//height-jkth-5*margin,
 				label = canvas.append("svg:g")
 					.attr("id", "label")
 					.attr("transform", "translate("+clistw+",0)"),
@@ -237,10 +231,8 @@
 				clist = canvas.append("svg:g")
 					.attr("id", "clist")
 					.attr("width", clistw),
-					
-
+				
             //Width and height for jabodetabek
-            	
             	projection = d3.geo.mercator()
                                .rotate([-105.8,5.9,0])//([-106.2,5.9,0])
     						   .scale(width*20)//(width*15)
@@ -282,9 +274,11 @@
 					.attr("id", "gjw")
     				.call(zoom2);
     				
-    			
+    		//global variable to store data movement csv
+			var data = [],
+				datadump = [],	
 			
-			var javjson = [],
+				javjson = [],
 				jakjson = [],
 				cities = [], 
 				unique_areatarget = [],
@@ -294,20 +288,17 @@
 				countByCity = {},
 				locationByCity = {},
 				positions = [],
-				positions2 = [];	
+				positions2 = [],
+				minmaxvaljkt = [],
+				minmaxvaljv = [],	
 				
-			var originmenu = "",//F1
+				originmenu = "",//F1
 				collectormenu = "",//F2
 				destinationmenu = "",//F3
 				speciesmenu = [],//F4
 				connectionmenu = "",//F5
-				filterwidth = 120,
-				widthbuble = 250,
-				heightbuble = 70,
-				leftbuble = width - 2.5*margin - widthbuble,
-				topbuble = 6*margin+8;
 				
-			var ljv1 = "",
+				ljv1 = "",
 				ljv2 = "",
 				ljv3 = "",
 				ljv4 = "",
@@ -316,54 +307,11 @@
 				ljkt2 = "",
 				ljkt3 = "",
 				ljkt4 = "",
-				ljkt5 = "";	
+				ljkt5 = "",	
 				
-			var ForDestFilter;
-			var DforDestFilter;			
+				ForFilter,
+				DvalueForFilter;	//global variabel to pass value from selected origin to filter		
 			
-			var getMaxTot = function (d)
-			{
-				dvalue = [];
-				d.forEach(function(datvalue,i) 
-				{
-					dvalue[i] = datvalue.tot;
-				})
-				
-				var minmaxval = []
-				minmaxval[0] = d3.min(dvalue);
-				minmaxval[1] = d3.max(dvalue);
-				return minmaxval
-//console.log(maxval)
-				
-			}
-			
-			function deviderLegend(minmaxval,peta)
-			{
-				var legVal = []
-				for (var i = 1; i < 5; i++)
-				{
-					legVal[5-i] = Math.round(minmaxval[0]+((minmaxval[1]-minmaxval[0]) - (((minmaxval[1]-minmaxval[0])/5)*i)));
-				}
-				console.log(legVal)
-				if(peta == "JV" )
-				{
-					d3.select("#lvj1").text("0");
-					d3.select("#ljv2").text(legVal[1]+" - "+legVal[2]);
-					d3.select("#ljv3").text(legVal[2]+1+" - "+legVal[3]);
-					d3.select("#ljv4").text(legVal[3]+1+" - "+legVal[4]);
-					d3.select("#ljv5").text(legVal[4]+1+" - "+minmaxval[1]);
-					
-				}
-				if(peta == "JKT")
-				{
-					ljkt1 = "0"
-					ljkt2 = legVal[1]+" - "+legVal[2];
-					ljkt3 = legVal[2]+1+" - "+legVal[3];
-					ljkt4 = legVal[3]+1+" - "+legVal[4];
-					ljkt5 = legVal[4]+1+" - "+minmaxval[1];
-				}
-			}
-            
             var setNormalColor = function(d)
             {
                 //Get data value
@@ -381,7 +329,7 @@
             var setJktColor = function(d)
             {
                 //Get data value
-console.log(d)
+//console.log(d)
                   var value = d.properties.value;
                   
                     if (value) {
@@ -482,122 +430,29 @@ console.log(d)
 			}
 			
 			//function to print weekly volume information of the origin areas based on selected destination
-			var getInfo = function (d,selected) 
+			var getInfoOrifromDest = function (d,selected) 
             {
-				var selrowdt = [],
-					info = "ORIGIN AREA (Weekly Volume) : ",
-					n = 0,
-					weektot = 0,
-					areaorigin = [],
-					areaselected = d.Name || d.properties.KAB_KOTA || d.properties.KABKOT;
+				areaselected = d.Name || d.properties.KAB_KOTA || d.properties.KABKOT;
 				
-				//sum total weekly volume from same origin and store into new variable
-				for (var i = 0; i < data.length; i++)
-				{
-					if (data[i].CY_district == areaselected)
-					{							
-						weektot = weektot + Math.round(data[i].weekly_volume);
-						data[i].tot = weektot;
-						selrowdt[n] = data[i];
-						areaorigin[n] = data[i].district_org_source;
-						n = n + 1;					
-					}
-				}
-							
-				//get unique data for filtering
-				var unique_areaorigin = areaorigin.filter(function(item, pos) 
-				{				
-					return areaorigin.indexOf(item) == pos;
-				});					
-				var unq_rowdat = [],
-			 		c = 0;
-				for (var i = 0; i < unique_areaorigin.length; i++)
-				{					 
-					 var filtcity = unique_areaorigin[i];
-					 //Find the corresponding data
-					for (var z = selrowdt.length-1; z>-1; z--)
+				//return data with selected origin selection
+				var databasedondest = data.filter(function(d)
 					{
-						if (selrowdt[z].district_org_source == filtcity)
-						{							
-							unq_rowdat[c]=selrowdt[z];
-							c = c+1;
-							break;				
-						}
-					}
-				} 
-				datamovjak=unq_rowdat;
-				//print info
-				for (var i = 0; i < unq_rowdat.length; i++)
-				{
-					if (unq_rowdat[i].CY_district == areaselected)
-					{							
-						info = info+" | " + unq_rowdat[i].district_org_source+"("+unq_rowdat[i].tot+")";					
-					}
-				}
-                
-                return info; 
+						return d.CY_district == areaselected;
+					})
+				
+				var datafilterbydistrictandspecies = d3.nest()
+					.key(function(d){ return d.species })
+					.key(function(d){ return d.district_org_source })
+					.rollup(function(d)
+						{
+							return d3.sum(d, function (g){ return g.weekly_volume});
+						})
+					.entries(databasedondest)
+				datamovjak=datafilterbydistrictandspecies;
 					
 			}
 			
-			var getInfo2 = function (d) 
-            {
-				var selrowdt = [],
-					info = "Destination AREA (Weekly Volume) : ",
-					n = 0,
-					weektot = 0,
-					areaorigin = [],
-					areaselected = d.Name || d.properties.KAB_KOTA || d.properties.KABKOT;
-				
-				//sum total weekly volume from same origin and store into new variable
-				for (var i = 0; i < data.length; i++)
-				{
-					if (data[i].district_org_source == areaselected)
-					{							
-						weektot = weektot + Math.round(data[i].weekly_volume);
-						data[i].tot = weektot;
-						selrowdt[n] = data[i];
-						areaorigin[n] = data[i].CY_district;
-						n = n + 1;					
-					}
-				}
-						
-				//get unique data for filtering
-				var unique_areaorigin = areaorigin.filter(function(item, pos) 
-				{				
-					return areaorigin.indexOf(item) == pos;
-				});	
-					
-				var unq_rowdat = [],
-			 		c = 0;
-				for (var i = 0; i < unique_areaorigin.length; i++)
-				{					 
-					 var filtcity = unique_areaorigin[i];
-					 //Find the corresponding data
-					for (var z = selrowdt.length-1; z>-1; z--)
-					{
-						if (selrowdt[z].CY_district == filtcity)
-						{							
-							unq_rowdat[c]=selrowdt[z];
-							c = c+1;
-							break;				
-						}
-					}
-				} 
-				datamovjav=unq_rowdat;
-				//print info
-				for (var i = 0; i < unq_rowdat.length; i++)
-				{
-					if (unq_rowdat[i].district_org_source == areaselected)
-					{							
-						info = info+" | " + unq_rowdat[i].CY_district+"("+unq_rowdat[i].tot+")";					
-					}
-				}
-                
-                return info; 
-					
-			}
-			
-			var getInfo3 = function (d) 
+			var getInfoDestfromOri = function (d) 
             {
 				areaselected = d.Name || d.properties.KAB_KOTA || d.properties.KABKOT;
 				
@@ -606,7 +461,6 @@ console.log(d)
 					{
 						return d.district_org_source == areaselected;
 					})
-//console.log(databasedonorigin)
 				
 				var datafilterbydistrictandspecies = d3.nest()
 					.key(function(d){ return d.species })
@@ -616,15 +470,12 @@ console.log(d)
 							return d3.sum(d, function (g){ return g.weekly_volume});
 						})
 					.entries(databasedonorigin)
-console.log(datafilterbydistrictandspecies)
-				datamovjav=datafilterbydistrictandspecies;
+				datamovjav=datafilterbydistrictandspecies;	
 				
-					
+				
 			}
-			
-			//global variable to store data movement csv
-			var data = [],
-				datadump = [];
+
+/******************************** F U N C T I O N S ********************************/				
 			function getcsvdata()
 			{
 				//Get data from CSV file
@@ -634,7 +485,7 @@ console.log(datafilterbydistrictandspecies)
 					// to delete the first row and get the header
 					var dirtyCSV = response.responseText;
 					var cleanCSV = dirtyCSV.split('\n').slice(1).join('\n');
-					data = d3.csv.parse(cleanCSV); 
+					data = d3.csv.parse(cleanCSV);
 				})
 			}
 		
@@ -720,14 +571,17 @@ console.log(datafilterbydistrictandspecies)
 
 								//target.select("#info")
 									//.text("Weekly Volume of Birds: " + d.properties.value + " (" + Math.round(d.properties.value)/1000 + " % )");
-									//.text(getInfo(d))
-								getInfo(d,"district")								
+									//.text(getInfoOrifromDest(d))
+								getInfoOrifromDest(d,"district")								
 							
 							//Show tooltip
 							d3.select("#tooltip").classed("hidden", false);
 							
 							//generate table info
-							var JakTable = tabulate(datamovjak, ["species","district_org_source",  "tot"]);
+							//var JakTable = tabulate(datamovjak, ["species","district_org_source",  "tot"]);
+							var datamovjakconvert = DataConverter(datamovjak,"dest_to_ori","district");	
+							var JakTable = tabulate2(datamovjakconvert);
+							deviderLegend(minmaxvaljkt,"JKT")
 								
 						})
 						/*.on("mouseout", function(d)
@@ -776,8 +630,8 @@ console.log(datafilterbydistrictandspecies)
                        .on("click", function(d)
 						{
 							//replacement for moveout
-							ForDestFilter = d3.select(this);
-							DforDestFilter = d;
+							ForFilter = d3.select(this);
+							DvalueForFilter = d;
 							d3.select(this).style("fill", setNormalColor(d));
 							d3.select("#tooltip").classed("hidden", true);
 							
@@ -909,7 +763,7 @@ console.log(datafilterbydistrictandspecies)
 
 												target.select("#info")
 													.text("location: " + d.location );
-													//.text(getInfo(d))
+													//.text(getInfoOrifromDest(d))
 															
 							
 											//Show tooltip
@@ -1036,7 +890,7 @@ console.log(datafilterbydistrictandspecies)
 
 												target.select("#info")
 													.text("location: " + d.location );
-													//.text(getInfo(d))
+													//.text(getInfoOrifromDest(d))
 															
 							
 											//Show tooltip
@@ -1106,16 +960,36 @@ console.log(datafilterbydistrictandspecies)
 							target.select("#daerah").text("Origin : "+d.properties.KAB_KOTA+" - " + d.properties.PROPINSI);
 							//target.select("#info").text(getInfo2(d));
 							//getInfo2(d);
-getInfo3(d);
+getInfoDestfromOri(d);
 //console.log(d)
 							//Show tooltip
 							d3.select("#tooltip").classed("hidden", false);
 							
 /************************** generate table info *****************************************/
-							//var JavTable = tabulate(datamovjav, ["key", "values", "values"]);
-							var JavTable = tabulate2(datamovjav);
-							//console.log(getMaxTot(datamovjav));
-							//deviderLegend(getMaxTot(datamovjav),"JV")
+							//var JavTable = tabulate(datamovjav, ["key", "values", "values"]);// to generate non-nested tabel
+							var datamovjavconvert = DataConverter(datamovjav,"ori_to_dest","district");	
+							var JavTable = tabulate2(datamovjavconvert);
+							
+							
+							minmaxvaljkt[1] = d3.max(d3.entries(datamovjavconvert), function(d) {
+							  return d3.max(d3.entries(d.value), function(e) {
+								  return d3.max(e.value, function(f) { return f.tot_week_vol; });
+							  });
+							});
+							
+							
+							minmaxvaljkt[0] = d3.min(d3.entries(datamovjavconvert), function(d) {
+							  return d3.min(d3.entries(d.value), function(e) {
+								  return d3.min(e.value, function(f) { return f.tot_week_vol; });
+							  });
+							});
+console.log(minmaxvaljkt)	
+							
+							deviderLegend(minmaxvaljkt,"JKT")
+							
+							
+							
+							
 							
 						
 
@@ -1386,7 +1260,7 @@ getInfo3(d);
 
 								target.select("#info")
 									.text("location: " + d.location );
-									//.text(getInfo(d))
+									//.text(getInfoOrifromDest(d))
 															
 							
 							//Show tooltip
@@ -1507,7 +1381,7 @@ getInfo3(d);
 
 								target.select("#info")
 									.text("location: " + d.location );
-									//.text(getInfo(d))
+									//.text(getInfoOrifromDest(d))
 															
 							
 							//Show tooltip
@@ -1641,7 +1515,7 @@ getInfo3(d);
 					});	
 			};
 			
-			// The table generation function
+			// The table generation function for non-nested table 
 			function tabulate(data, columns) 
 			{
 				var table = clist.append("foreignObject")
@@ -1694,7 +1568,7 @@ getInfo3(d);
 			}
 			
 			
-			// The table generation function
+			// The table generation function foe nested tabel
 			function tabulate2(data) 
 			{
 				var table = clist.append("foreignObject")
@@ -1734,67 +1608,6 @@ getInfo3(d);
 					.attr("x", width)
 					.attr("y", height-5)
 					.text("@Urremote.com 2015");
-			}
-			
-			//create scale bar graph
-			function scalegraph()
-			{			
-				var scale = d3.scale.linear().domain([50000, 0]).range([jktw-margin, margin]),
-					axis = d3.svg.axis().scale(scale).ticks(5).orient("botom");
-				clist.append("svg:rect")
-					.attr("fill", "url(#gradSD)")
-					.attr("x", margin)
-					.attr("y", margin)
-					.attr("width", jktw-2*margin)
-					.attr("height", margin);//height - h2 - 5*margin);
-				clist.append("svg:g")
-					.attr("transform", "translate(0,2)")
-					.classed("axis", true)
-					.call(axis);
-				clist.append("svg:text")
-					.classed("expl", true)
-					.attr("transform", "translate("+ (margin+2) +"," + (2*margin-5) + ")")
-					.text("Weekly Volume Subdistrict")
-				
-				clist.append("svg:rect")
-					.attr("fill", "url(#gradLBM)")
-					.attr("x", margin)
-					.attr("y", 2*margin+2)
-					.attr("width", jktw-2*margin)
-					.attr("height", margin);
-				clist.append("svg:text")
-					.classed("expl", true)
-					.attr("transform", "translate("+ (margin+2) +"," + (3*margin-5) + ")")
-					.text("Weekly Volume LBM")
-			
-				//add color on the bar    
-				var grad = defs.append("svg:linearGradient")
-					.attr("id", "gradSD")
-					.attr("x1", "0%")
-					.attr("x2", "100%")
-					.attr("y1", "100%")
-					.attr("y2", "100%")
-					.attr("spreadMethod", "pad");
-				grad.append("svg:stop")
-					.attr("offset", "0%")
-					.attr("stop-color", "white");
-				grad.append("svg:stop")
-					.attr("offset", "100%")
-					.attr("stop-color", "blue");
-					
-				var grad2 = defs.append("svg:linearGradient")
-					.attr("id", "gradLBM")
-					.attr("x1", "0%")
-					.attr("x2", "100%")
-					.attr("y1", "100%")
-					.attr("y2", "100%")
-					.attr("spreadMethod", "pad");
-				grad2.append("svg:stop")
-					.attr("offset", "0%")
-					.attr("stop-color", "white");
-				grad2.append("svg:stop")
-					.attr("offset", "100%")
-					.attr("stop-color", "red");
 			}
 			
 			//create legend bar 
@@ -2329,11 +2142,11 @@ getInfo3(d);
 			//function filter for destination
 			function datafilterdest(destination)
 			{	
-				if (typeof ForDestFilter != 'undefined')
+				if (typeof ForFilter != 'undefined')
 				{
 				
 					//replacement for moveout
-					ForDestFilter.style("fill", setNormalColor(DforDestFilter));
+					ForFilter.style("fill", setNormalColor(DvalueForFilter));
 					d3.select("#tooltip").classed("hidden", true);
 					
 					//remove selection on Java Map
@@ -2359,7 +2172,7 @@ getInfo3(d);
 					if (destination == "District (D)" || destination == "D+SD" || destination == "D+LBM" || destination == "D+SD+LBM")
 					{
 						//get the origin cities based on selected destination
-						var destcity = getDestCity(DforDestFilter, "district");
+						var destcity = getDestCity(DvalueForFilter, "district");
 						var dt = function(ori, dest) 
 						{
 
@@ -2393,7 +2206,7 @@ getInfo3(d);
 /************************** generate position subdistrict *******************************/
 					if (destination == "SubDistrict (SD)" || destination == "D+SD" || destination == "SD+LBM" || destination == "D+SD+LBM")
 					{
-						var destsd = getDestCity(DforDestFilter, "subdistrict");
+						var destsd = getDestCity(DvalueForFilter, "subdistrict");
 						var dtsd = function(datassd) 
 						{
 
@@ -2462,7 +2275,7 @@ getInfo3(d);
 
 										target.select("#info")
 											.text("location: " + d.location );
-											//.text(getInfo(d))
+											//.text(getInfoOrifromDest(d))
 													
 					
 									//Show tooltip
@@ -2512,7 +2325,7 @@ getInfo3(d);
 /************************** generate position LBM ***************************************/
 					if (destination == "LBM" || destination == "D+LBM" || destination == "SD+LBM" || destination == "D+SD+LBM")
 					{
-						var destlbm = getDestCity(DforDestFilter, "lbm");
+						var destlbm = getDestCity(DvalueForFilter, "lbm");
 						var dtlbm = function(dataslbm) 
 						{
 
@@ -2580,14 +2393,14 @@ getInfo3(d);
 
 										target.select("#info")
 											.text("location: " + d.location );
-											//.text(getInfo(d))
+											//.text(getInfoOrifromDest(d))
 													
 					
 									//Show tooltip
 									d3.select("#tooltip").classed("hidden", false);
 					
 									//get the origin cities based on selected destination
-									var selecteddata = getDistrictBasedOnMarketCode(DforDestFilter);
+									var selecteddata = getDistrictBasedOnMarketCode(DvalueForFilter);
 									var oricity = getOriginCity(selecteddata);
 									var dt = function(dest,ori) 
 									{
@@ -2628,7 +2441,7 @@ getInfo3(d);
 					}
 					
 /************************** generate select-self district position and Bubble text ******/									
-					ForDestFilter.style("fill", "purple");
+					ForFilter.style("fill", "purple");
 			
 					var target = d3.select("#tooltip")
 						.style("left", leftbuble+"px")//coordinates[0] + "px")
@@ -2636,16 +2449,18 @@ getInfo3(d);
 						.style("width", widthbuble+"px")
 						.style("height", heightbuble+"px");
 
-					target.select("#daerah").text("Origin : "+DforDestFilter.properties.KAB_KOTA+" - " + DforDestFilter.properties.PROPINSI);
+					target.select("#daerah").text("Origin : "+DvalueForFilter.properties.KAB_KOTA+" - " + DvalueForFilter.properties.PROPINSI);
 					//target.select("#info").text(getInfo2(d));
-					getInfo3(DforDestFilter);
+					getInfoDestfromOri(DvalueForFilter);
 					//Show tooltip
 					d3.select("#tooltip").classed("hidden", false);
 					
 /************************** generate table info *****************************************/
-					var JavTable = tabulate2(datamovjav);
-					console.log(getMaxTot(datamovjav));
-					deviderLegend(getMaxTot(datamovjav),"JV")
+					var datamovjavconvert = DataConverter(datamovjav,"ori_to_dest","district");	
+					var JavTable = tabulate2(datamovjavconvert);
+					deviderLegend(minmaxvaljv,"JV")
+					
+					
 				}
 			}
 			
@@ -2676,19 +2491,19 @@ getInfo3(d);
 						
 					data = datafilter;
 					
-					if (typeof DforDestFilter != 'undefined')
+					if (typeof DvalueForFilter != 'undefined')
 					{	
 						d3.select("table").remove();
-console.log(DforDestFilter)
-						getInfo3(DforDestFilter);
-						var JavTable = tabulate2(datamovjav);
-						//var JavTable = tabulate(datamovjav, ["species", "CY_district", "tot"]);
+
+						getInfoDestfromOri(DvalueForFilter);
+						var datamovjavconvert = DataConverter(datamovjav,"ori_to_dest","district");	
+						var JavTable = tabulate2(datamovjavconvert);
+						//var JavTable = tabulate(datamovjav, ["species", "CY_district", "tot"]); //to display non-nested tabel
 					}
 					
 					
-//console.log([species])
-				}
-				
+
+				}	
 				
 			}
 			
@@ -2703,6 +2518,116 @@ console.log(DforDestFilter)
 					datadump = d3.csv.parse(cleanCSV);
 
 				});
+			}
+			
+			//additional function to generate tabular2
+			function recurse(sel) 
+			{
+				// sel is a d3.selection of one or more empty tables
+				sel.each(function(d) {
+				// d is an array of objects
+				var colnames,
+					tds,
+					table = d3.select(this);
+
+				// obtain column names by gathering unique key names in all 1st level objects
+				// following method emulates a set by using the keys of a d3.map()
+				colnames = d                                                          // array of objects
+					.reduce(function(p,c) { return p.concat(d3.keys(c)); }, [])       // array with all keynames
+					.reduce(function(p,c) { return (p.set(c,0), p); }, d3.map())      // map with unique keynames as keys
+					.keys();                                                          // array with unique keynames (arb. order)
+
+				// colnames array is in arbitrary order
+				// sort colnames here if required
+
+				// create header row using standard 1D data join and enter()
+				table.append("thead").append("tr").selectAll("th")
+					.data(colnames)
+					.enter()
+					.append("th")
+					.text(function(d) //.text(function(d) { return d; });
+						{ 
+							if (d == "species"){d = "Species"}
+							if (d == "dest_and_tot"){d = "Destination and Total"}
+							if (d == "dest"){d = "Destination"}
+							if (d == "tot_week_vol"){d = "Total Weekly Volume"}
+		
+							return d; 
+						});
+
+				// create the table cells by using nested 2D data join and enter()
+				tds = table.append("tbody").selectAll("tr")
+					.data(d)                            			// each row gets one object
+				  	.enter()
+				  	.append("tr")
+				  	.selectAll("td")
+					.data(function(d) 
+						{                 							// each cell gets one value
+							return colnames.map(function(k) 
+							{										// for each colname (i.e. key) find the corresponding value
+								return d[k] || "";              	// use empty string if key doesn't exist for that object
+							});
+						})
+					.enter()
+					.append("td");
+
+				// cell contents depends on the data bound to the cell
+				// fill with text if data is not an Array
+				tds.filter(function(d) { return !(d instanceof Array); })
+					.text(function(d) { return d; });
+				// fill with a new table if data is an Array
+				tds.filter(function(d) { return (d instanceof Array); })
+					.append("table")
+					.call(recurse);
+				});
+			}
+			
+			//function to convert the "key" and "values"
+			function DataConverter (dataori,type,model)//type = {"ori to dest", "dest to ori"}| model = {"district","subdistrict","LBM"}
+			{
+				for (var i = 0; i < dataori.length; i++)
+
+				{
+					dataori[i].species = dataori[i].key;
+					dataori[i].dest_and_tot = dataori[i].values;
+					for (var j = 0; j < dataori[i].values.length; j++)
+					{
+						dataori[i].dest_and_tot[j].dest = dataori[i].values[j].key;
+						dataori[i].dest_and_tot[j].tot_week_vol = dataori[i].values[j].values;
+						delete 	dataori[i].values[j].key;
+						delete dataori[i].values[j].values;
+					}
+					delete dataori[i].key;
+					delete dataori[i].values;
+				};
+				return dataori;
+			}
+			
+			function deviderLegend(minmaxval,peta)
+			{
+				var legVal = []
+				for (var i = 1; i < 5; i++)
+				{
+					legVal[5-i] = Math.round(minmaxval[0]+((minmaxval[1]-minmaxval[0]) - (((minmaxval[1]-minmaxval[0])/5)*i)));
+				}
+console.log(minmaxval)
+				if(peta == "JV" )
+				{
+					d3.select("#lvj1").text("0");
+					d3.select("#ljv2").text(legVal[1]+" - "+legVal[2]);
+					d3.select("#ljv3").text(legVal[2]+1+" - "+legVal[3]);
+					d3.select("#ljv4").text(legVal[3]+1+" - "+legVal[4]);
+					d3.select("#ljv5").text(legVal[4]+1+" - "+minmaxval[1]);
+					
+				}
+				if(peta == "JKT")
+				{
+					ljkt1 = "0"
+					ljkt2 = legVal[1]+" - "+legVal[2];
+					ljkt3 = legVal[2]+1+" - "+legVal[3];
+					ljkt4 = legVal[3]+1+" - "+legVal[4];
+					ljkt5 = legVal[4]+1+" - "+minmaxval[1];
+				}
 			}
 
             
@@ -2731,156 +2656,21 @@ console.log(DforDestFilter)
             
             
             //added jabodetabek map
-            d3.json("jakarta.json", function(json) {
-
-/*				
-				//add information of Kab_Kota from JABODETABEK map into the bar chart list
-				var areadistrict = json.features.filter(function(d, i) {
-						return d.properties.value != null;
-						}).sort(function(a, b) { return b.properties.value - a.properties.value; }),
-					ch = clisth / (areadistrict.length+1);
-				clist.selectAll("text.label")
-					.data(areadistrict)
-					.enter()
-					.append("svg:text")
-					.classed("label", true)
-					.attr("transform", function(d, i) {
-							return "translate(100," + ((i+1) * ch + 5) + ")";
-						})
-					.text(function(d) { return d.properties.KAB_KOTA; })
-					.on("click", function(d) {
-							//replacement moveout
-							d3.selectAll(".active").classed("active", false);
-							map.selectAll("path")
-								.style("fill", setNormalColor)
-								.style("stroke", "rgb(0,109,44)");
-							map2.selectAll("path")
-								.style("fill", setNormalColor)
-								.style("stroke", "rgb(0,109,44)");
-							label.selectAll("text").remove();
-							//end moveout
-							
-							d3.selectAll(".active").classed("active", false);
-							d3.select(d3.event.target).classed("active", true);
-							var check_kota = d.properties.KAB_KOTA;
-
-							updateMapJKT(d);
-							updateMapJAVA(javjson.features.filter(function(d, i) {
-								return d.properties.KAB_KOTA == check_kota;})); 	
-						})
-					.on("mouseout", function(d){
-							d3.selectAll(".active").classed("active", false);
-							map.selectAll("path")
-								.style("fill", setNormalColor)
-								.style("stroke", "rgb(0,109,44)");
-							map2.selectAll("path")
-								.style("fill", setNormalColor)
-								.style("stroke", "rgb(0,109,44)");
-							label.selectAll("text").remove();
-						});
-			
-				//draw the connector line between the area and bar chart		
-				var l = d3.svg.line();
-					clist.selectAll("path.pointer")
-						.data(areadistrict)
-						.enter()
-						.append("svg:path")
-						.classed("pointer", true)
-						.attr("fill", "none")
-						.attr("d", function(d, i) {
-								var s = [25, scale(d.properties.value / 1000)],
-									m = [65, scale(d.properties.value / 1000)],
-									e = [95, (i+1) * ch];
-								return l([s, m, e]);
-							});
-*/							
-				//generate dot points as cities positions
-				//districtextraction(json, positions, projection, circles, "red")
-				
+            d3.json("jakarta.json", function(json) {				
 				jakjson = json;
-				updateMapJKT(json);
-
-
-									      
-				 
+				updateMapJKT(json);									      
             });
                    
         	// generate SVG for second Geojson MAP (java island)  
 			d3.json("indonesia_districts_java_only.json", function(json) {
-			
-				/*
-				//assigned long and lat oh java district based on centroid  
-				for	 (var i = 0; i < json.features.length; i++)
-				{
-					var centroid_value = path2.centroid(json.features[i]),
-						translate = projection2.translate();
-					json.features[i].properties.longitude = (translate[0]-centroid_value[0]-(jww/2));
-					json.features[i].properties.latitude = (translate[1]-centroid_value[1]-(jwh/2));
-
-					if (json.features[i].properties.KAB_KOTA == "JAKARTA UTARA")
-					{
-					
-					}	 
-				}
-				*/
-			
 				
 				javjson = json;  
              	updateMapJAVA(json);
-             	
-             	
-	
-				
             });
             
             
             
-			function recurse(sel) {
-			  // sel is a d3.selection of one or more empty tables
-			  sel.each(function(d) {
-				// d is an array of objects
-				var colnames,
-					tds,
-					table = d3.select(this);
-
-				// obtain column names by gathering unique key names in all 1st level objects
-				// following method emulates a set by using the keys of a d3.map()
-				colnames = d                                                          // array of objects
-					.reduce(function(p,c) { return p.concat(d3.keys(c)); }, [])       // array with all keynames
-					.reduce(function(p,c) { return (p.set(c,0), p); }, d3.map())      // map with unique keynames as keys
-					.keys();                                                          // array with unique keynames (arb. order)
-
-				// colnames array is in arbitrary order
-				// sort colnames here if required
-console.log(colnames)
-				// create header row using standard 1D data join and enter()
-				table.append("thead").append("tr").selectAll("th")
-					.data(colnames)
-				  .enter().append("th")
-					.text(function(d) { return d; });
-
-				// create the table cells by using nested 2D data join and enter()
-				// see also http://bost.ocks.org/mike/nest/
-				tds = table.append("tbody").selectAll("tr")
-					.data(d)                            // each row gets one object
-				  .enter().append("tr").selectAll("td")
-					.data(function(d) {                 // each cell gets one value
-					  return colnames.map(function(k) { // for each colname (i.e. key) find the corresponding value
-						return d[k] || "";              // use empty string if key doesn't exist for that object
-					  });
-					})
-				  .enter().append("td");
-
-				// cell contents depends on the data bound to the cell
-				// fill with text if data is not an Array
-				tds.filter(function(d) { return !(d instanceof Array); })
-					.text(function(d) { return d; });
-				// fill with a new table if data is an Array
-				tds.filter(function(d) { return (d instanceof Array); })
-					.append("table")
-					.call(recurse);
-			  });
-			}
+			
             
             
 
