@@ -678,13 +678,10 @@
 
 							d3.select(this)
 									.style("fill", "orange");
-
-							var coordinates = [0, 0];
-								coordinates = d3.mouse(this);
-	
+									
 							var target = d3.select("#tooltip")
-									.style("left", leftbuble+"px")//coordinates[0] + "px")
-									.style("top", topbuble+"px")//coordinates[1] + "px")
+									.style("left", leftbuble+"px")
+									.style("top", topbuble+"px")
 									.style("width", widthbuble+"px")
 									.style("height", heightbuble+"px");
 								target.select("#daerah")
@@ -993,19 +990,27 @@
 										.on("click", function(d) 
 										{
 
-											// replacement for moveout
-											d3.select("#tooltip").classed("hidden", true);
+											//replacement moveout
+											d3.select(this).style("fill", "white");
+											d3.select("#tooltip").classed("hidden", true);	//hide
+							
 											//remove selection on Java Map
 											map2.selectAll("path")
 											.style("fill", setNormalColor)
 											.attr("stroke-width", 1);
 											//end removal section
-											
+							
+											//remove selection on Java Map
 											map.selectAll("path")
 											.style("fill", setNormalColor)
 											.attr("stroke-width", 1);
 											//end removal section
-											// end moveout
+							
+											d3.select("table").remove();
+											//end moveout
+											
+											d3.select(this)
+												.style("fill", "orange");
 											
 											var target = d3.select("#tooltip")
 													.style("left", leftbuble+"px")
@@ -1014,14 +1019,32 @@
 													.style("height", heightbuble+"px");
 												target.select("#daerah")
 													.text("DEST Subdistrict :"+d.subdistrict);
-
-												target.select("#info")
-													.text("location: " + d.location );
-															
 							
 											//Show tooltip
 											d3.select("#tooltip").classed("hidden", false);
 							
+/************************** generate table info *****************************************/
+											getInfoOrifromDest(d,"district")
+											//var JakTable = tabulate(datamovjak, ["species","district_org_source",  "tot"]);
+											var datamovjakconvert = DataConverter2(datamovjak,"dest_to_ori","district");	
+											var datamovjakconvertaddtot = addTotalField(datamovjakconvert);
+											var totalreceive = addTotalSendOrReceive(datamovjakconvert);
+											target.select("#info").text("Total weekly from All Origins (detail below) : "+totalreceive+" species");
+											var JakTable = tabulate2(datamovjakconvertaddtot);
+							
+											if(d3.select("#legendJKT").empty()) {legendinJak();}
+											if(d3.select("#legendJKTR").empty()) {legendRepJak();}
+											if(d3.select("#legendJV").empty()) {legendinJava();}
+											if(d3.select("#legendJVR").empty()) {legendRepJava();}
+											d3.select("#legendJKT").classed("hidden", true);
+											d3.select("#legendJKTR").classed("hidden", false);
+											d3.select("#legendJV").classed("hidden", false);
+											d3.select("#legendJVR").classed("hidden", true);
+											d3.select("#ljkt1R").text(totalreceive+" species");
+							
+							
+											minmaxvaljv = getMaxTot(datamovjakconvertaddtot)
+											deviderLegend(minmaxvaljv,"JV")
 							
 											//get the origin cities based on selected destination
 											var oricity = getOriginCity(d);
@@ -1050,10 +1073,22 @@
 											}; 
 											//generate all selected origin city on Java Map
 											dt_res = dt(javjson,oricity); 
+											
+											//added total value to the data
+											for (var i = 0; i < dt_res.length; i++)
+											{
+												for (var j = 0; j < datamovjakconvertaddtot.length; j++)
+												{
+													if (dt_res[i].properties.KAB_KOTA == datamovjakconvertaddtot[j].ori)
+													{
+														dt_res[i].properties.total = datamovjakconvertaddtot[j].total
+													}
+												}
+											} 
 											map2.selectAll("path")
 												.data(dt_res, function(d) { 
 													return d.properties.OBJECTID; })
-												.style("fill", "blue")//color(js.properties.value))
+												.style("fill", setJavColorSDLBM)//color(js.properties.value))
 												.attr("stroke-width", 2);
 											//end of generation
 							 
@@ -1132,21 +1167,43 @@
 											//end removal section
 											//end moveout
 											
+											d3.select(this)
+													.style("fill", "orange");
+											
 											var target = d3.select("#tooltip")
-													.style("left", leftbuble+"px")//coordinates[0] + "px")
-													.style("top", topbuble+"px")//coordinates[1] + "px")
+													.style("left", leftbuble+"px")
+													.style("top", topbuble+"px")
 													.style("width", widthbuble+"px")
 													.style("height", heightbuble+"px");
 												target.select("#daerah")
-													.text("DEST LBM :"+d.name);
+													.text("DESTINATION LBM :"+d.name);
 
-												target.select("#info")
-													.text("location: " + d.location );
-															
-							
 											//Show tooltip
 											d3.select("#tooltip").classed("hidden", false);
+
+/************************** generate table info *****************************************/
+											getInfoOrifromDest(d,"district")
+											//var JakTable = tabulate(datamovjak, ["species","district_org_source",  "tot"]);
+											var datamovjakconvert = DataConverter2(datamovjak,"dest_to_ori","district");	
+											var datamovjakconvertaddtot = addTotalField(datamovjakconvert);
+											var totalreceive = addTotalSendOrReceive(datamovjakconvert);
+											target.select("#info").text("Total weekly from All Origins (detail below) : "+totalreceive+" species");
+											var JakTable = tabulate2(datamovjakconvertaddtot);
 							
+											if(d3.select("#legendJKT").empty()) {legendinJak();}
+											if(d3.select("#legendJKTR").empty()) {legendRepJak();}
+											if(d3.select("#legendJV").empty()) {legendinJava();}
+											if(d3.select("#legendJVR").empty()) {legendRepJava();}
+											d3.select("#legendJKT").classed("hidden", true);
+											d3.select("#legendJKTR").classed("hidden", false);
+											d3.select("#legendJV").classed("hidden", false);
+											d3.select("#legendJVR").classed("hidden", true);
+											d3.select("#ljkt1R").text(totalreceive+" species");
+							
+							
+											minmaxvaljv = getMaxTot(datamovjakconvertaddtot)
+											deviderLegend(minmaxvaljv,"JV")
+										
 											//get the origin cities based on selected destination
 											var selecteddata = getDistrictBasedOnMarketCode(d);
 											var oricity = getOriginCity(selecteddata);
@@ -1175,10 +1232,23 @@
 											}; 
 											//generate all selected origin city on Java Map
 											dt_res = dt(javjson,oricity); 
+											
+											//added total value to the data
+											for (var i = 0; i < dt_res.length; i++)
+											{
+												for (var j = 0; j < datamovjakconvertaddtot.length; j++)
+												{
+													if (dt_res[i].properties.KAB_KOTA == datamovjakconvertaddtot[j].ori)
+													{
+														dt_res[i].properties.total = datamovjakconvertaddtot[j].total
+													}
+												}
+											} 
+							
 											map2.selectAll("path")
 												.data(dt_res, function(d) { 
 													return d.properties.OBJECTID; })
-												.style("fill", "red")//color(js.properties.value))
+												.style("fill", setJavColorSDLBM)//color(js.properties.value))
 												.attr("stroke-width", 2);
 											//end of generation
 										})
@@ -3428,7 +3498,7 @@
 					{
 						total = total + data[i].spec_and_tot[j].tot_week_vol;
 					}
-					data[i].total = total
+					data[i].total = +total
 				}
 				return data;
             }
@@ -3444,7 +3514,7 @@
 						total = total + data[i].spec_and_tot[j].tot_week_vol;
 					}
 				}
-				return total;
+				return +total;
             }
             
             function getMaxTot(d)
