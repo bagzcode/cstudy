@@ -518,7 +518,7 @@
 				//return data with selected origin selection
 				var databasedondest = data.filter(function(d)
 					{
-						return d.CY_district == areaselected;
+						return d.CY_district == areaselected && d.weekly_volume != 0;
 					})
 				
 				var datafilterbydistrictandspecies = d3.nest()
@@ -526,7 +526,7 @@
 					.key(function(d){ return d.species })
 					.rollup(function(d)
 						{
-							return d3.sum(d, function (g){ return g.weekly_volume});
+							return d3.sum(d, function (g){return parseFloat(g.weekly_volume)});
 						})
 					.entries(databasedondest)
 				datamovjak=datafilterbydistrictandspecies;
@@ -542,7 +542,7 @@
 					//return data with selected origin selection
 					var databasedonorigin = data.filter(function(d)
 						{
-							return d.district_org_source == areaselected;
+							return d.district_org_source == areaselected && d.weekly_volume != 0;
 						})
 				
 					var datafilterbydistrictandspecies = d3.nest()
@@ -550,7 +550,7 @@
 						.key(function(d){ return d.species })
 						.rollup(function(d)
 							{
-								return d3.sum(d, function (g){ return g.weekly_volume});
+								return d3.sum(d, function (g){ return parseFloat(g.weekly_volume)});
 							})
 						.entries(databasedonorigin)
 					datamovjav=datafilterbydistrictandspecies;	
@@ -3392,7 +3392,6 @@
 			//function to convert the "key" and "values"
 			function DataConverter2 (dataori,type,model)//type = {"ori to dest", "dest to ori"}| model = {"district","subdistrict","LBM"}
 			{
-//console.log(dataori)
 				for (var i = 0; i < dataori.length; i++)
 
 				{
