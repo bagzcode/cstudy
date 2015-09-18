@@ -165,12 +165,10 @@
 			}
 			
 			.outer {
-				width: 300px;
 				height: 500px;
 				overflow: auto;
 			}
 			.inner {
-				width: 300px;
 				height: 500px;
 			}
 			#InfoTab{
@@ -222,16 +220,18 @@
 			
 			var	clistw = 250,
 				clisth = 300,
-				jktw = (width-15*margin),///2,
+				jktw = width*5/8,//(width-15*margin),///2,
 				jkth = (height-8*margin)*5/8,//jktw*3/4,
-				jktx = width-jktw-15*margin,//400,
-				jww = width-15*margin,
+				jktx = 0,//width-jktw-15*margin,//400,
+				jww = width*5/8,//width-15*margin,
 				jwh = (height-8*margin)*3/8//height-7*margin,//height-jkth-5*margin,
 				filterwidth = 120,
-				widthbuble = 250,
+				widthbuble = 1/4*width,
 				heightbuble = 70,
-				leftbuble = width - 2.5*margin - widthbuble,
+				leftbuble = jktw + (3*margin),
 				topbuble = 6*margin+8,
+				outermargin = 3/10*width,
+				innermargin = 3/10*width,
 				
 				svg = d3.select("body")
 					.append("svg:svg")
@@ -259,9 +259,7 @@
 					.attr("width", jktw)
 					.attr("height", jkth)
 					.append("svg:g"),
-				clist = canvas.append("svg:g")
-					.attr("id", "clist")
-					.attr("width", clistw),
+					
 				
             //Width and height for jabodetabek
             	projection = d3.geo.mercator()
@@ -1143,7 +1141,7 @@
 			// The table generation function for non-nested table 
 			function tabulate(data, columns) 
 			{
-				var table = clist.append("foreignObject")
+				var table = canvas.append("foreignObject")
 					.attr("x", width - 4*margin - 250)
 					.attr("y", 4*margin)
 					.attr("width", 250)
@@ -1195,16 +1193,20 @@
 			// The table generation function foe nested tabel
 			function tabulate2(data) 
 			{
-				var table = clist.append("foreignObject")
-								.attr("x", width - 3*margin - 250)
+	console.log(jktw )
+	console.log(width )			
+				var table = canvas.append("foreignObject")
+								.attr("x", jktw + (2*margin))
 								.attr("y", 10*margin)
-								.attr("width", 250)
-								.attr("height",height-5*margin)
+								//.attr("width", 300)
+								//.attr("height",height-5*margin)
 								.append("xhtml:body")
 								.append("div")
 								.attr("class", "outer")
+								.attr("style","width:" + outermargin +"px")
 								.append("div")
 								.attr("class", "inner")
+								.attr("style","width:" + innermargin +"px")
 								.append("div")
 								.attr("id", "InfoTab")
 								.selectAll("table")
@@ -1237,7 +1239,7 @@
 			//create legend bar 
 			function legendinJava()
 			{			
-				var legendjv = clist.append("g").attr("id", "legendJV")
+				var legendjv = canvas.append("g").attr("id", "legendJV")
 				legendjv.append("svg:rect")
 					.attr("id", "ljvb5")
 					.attr("fill", "#FF0000")
@@ -1316,7 +1318,7 @@
 			
 			function legendRepJava()
 			{			
-				var legendjvR = clist.append("g").attr("id", "legendJVR")
+				var legendjvR = canvas.append("g").attr("id", "legendJVR")
 					
 				legendjvR.append("svg:rect")
 					.attr("fill", "purple")
@@ -1339,7 +1341,7 @@
 			
 			function legendinJak()
 			{			
-				var legendjkt = clist.append("g").attr("id", "legendJKT")
+				var legendjkt = canvas.append("g").attr("id", "legendJKT")
 				legendjkt.append("svg:rect")
 					.attr("id", "ljktb5")
 					.attr("fill", "#0015FF")
@@ -1419,7 +1421,7 @@
 			
 			function legendRepJak()
 			{			
-				var legendjktR = clist.append("g").attr("id", "legendJKTR")
+				var legendjktR = canvas.append("g").attr("id", "legendJKTR")
 					
 				legendjktR.append("svg:rect")
 					.attr("fill", "orange")
@@ -1652,12 +1654,11 @@
 							.append("div")
 							.attr("id", "f4")
 							.text("SPECIES : ")
-							//.attr("style","vertical-align: top")
+							.attr("style","vertical-align: top")
 							.append("select")
+							.attr("style","vertical-align: top")
 							.attr("multiple","multiple")
 							.attr("size",5) 
-							//.attr("style","width: 200px")
-							//.attr("style","height: 100%")
 							.on("change", function () 
 							{ 
 								dispatch.specieschange(speciesById.get(this.value)); 
@@ -1846,8 +1847,6 @@
 					}
 						
 					data = datafilter;
-console.log(typeof JVForFilter)
-console.log(typeof JKTForFilter)
 					
 					if (typeof JVForFilter != 'undefined')
 					{
