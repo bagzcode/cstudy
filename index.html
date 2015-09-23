@@ -3,11 +3,650 @@
 <head>
   <meta charset="utf-8">
   <title>D3: Project Birds Mapping</title>
-  <link rel="stylesheet" href="css/pure-min.css">
+  <link rel="stylesheet" href="css/bootstrap.min.css">
   <link rel="stylesheet" href="css/style.css">
-  <script type="text/javascript" src="../d3/d3.min.js"></script>
+  <script type="text/javascript" src="../js/jquery-1.11.3.min.js"></script>
+  <script type="text/javascript" src="../js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="../js/d3/d3.min.js"></script>
 </head>
 <body>
+  <div class="container-fluid">
+
+    <!-- Header -->
+    <div class="row">
+      <div class="col-md-12">
+        <h3>Movement Tool : Connections of Collectors, Live Bird Markets and district of origin for live birds traded in JABODETABEK</h3>
+      </div>
+    </div>
+
+    <!-- Content/Body -->
+    <div class="row">
+
+      <!-- Map Goes Here~ -->
+      <div class="col-md-8">
+      </div>
+
+      <!-- Filter -->
+      <div class="col-md-4">
+        <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+
+          <!-- first panel -->
+          <div class="panel panel-info">
+            <div class="panel-heading" role="tab" id="heading_search_markets_and_collectors">
+              <h6 class="panel-title">
+                <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse_search_markets_and_collectors" aria-expanded="true" aria-controls="collapse_search_markets_and_collectors">
+                  Search Markets and collectors in JABODETABEK
+                </a>
+              </h6>
+            </div>
+            <div id="collapse_search_markets_and_collectors" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading_search_markets_and_collectors">
+              <div class="panel-body">
+                <!-- sub panel -->
+                <div class="panel-group" id="sub_accordion_search_markets_and_collectors" role="tablist" aria-multiselectable="true">
+                  <!-- sub first panel / Search Collectors connected to a Market -->
+                  <div class="panel panel-info">
+                    <div class="panel-heading" role="tab" id="heading_search_collectors">
+                      <h6 class="panel-title">
+                        <a role="button" data-toggle="collapse" data-parent="#sub_accordion_search_markets_and_collectors" href="#collapse_search_collectors" aria-expanded="true" aria-controls="collapse_search_collectors">
+                          Search Collectors connected to a Market
+                        </a>
+                      </h6>
+                    </div>
+                    <div id="collapse_search_collectors" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading_search_collectors">
+                      <div class="panel-body">
+                        <!-- isi filter -->
+                        <div class="row">
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <div class="checkbox">
+                                <label>
+                                  <input type="checkbox"> By name or number
+                                </label>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <input type="text" class="form-control input-sm" placeholder="(enter name or click on map)">
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <div class="checkbox">
+                                <label>
+                                  <input type="checkbox"> All markets in sub-district
+                                </label>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <input type="text" class="form-control input-sm" placeholder="(enter name or click on map)">
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <div class="checkbox">
+                                <label>
+                                  <input type="checkbox"> All markets in district
+                                </label>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <input type="text" class="form-control input-sm" placeholder="(enter name or click on map)">
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-md-12">
+                            <div class="form-inline">
+                              <div class="form-group">
+                                <div class="checkbox">
+                                  <label>
+                                    <input type="checkbox"> Ayam Kampung
+                                  </label>
+                                </div>
+                              </div>
+                              <div class="form-group">
+                                <div class="checkbox">
+                                  <label>
+                                    <input type="checkbox"> Broiler
+                                  </label>
+                                </div>
+                              </div>
+                              <div class="form-group">
+                                <div class="checkbox">
+                                  <label>
+                                    <input type="checkbox"> Ducks
+                                  </label>
+                                </div>
+                              </div>
+                              <div class="form-group">
+                                <div class="checkbox">
+                                  <label>
+                                    <input type="checkbox"> Layer
+                                  </label>
+                                </div>
+                              </div>
+                              <div class="form-group">
+                                <div class="checkbox">
+                                  <label>
+                                    <input type="checkbox"> <b>ALL</b>
+                                  </label>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="panel panel-footer">
+                        <div class="form-group">
+                          <button class="btn btn-primary btn-block">Get Data!</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div> <!-- end of sub first panel / Search Collectors connected to a Market -->
+
+                  <!-- sub second panel / Search Markets connected to a Collector -->
+                  <div class="panel panel-info">
+                    <div class="panel-heading" role="tab" id="heading_search_markets">
+                      <h6 class="panel-title">
+                        <a role="button" data-toggle="collapse" data-parent="#sub_accordion_search_markets_and_collectors" href="#collapse_search_markets" aria-expanded="true" aria-controls="collapse_search_markets">
+                          Search Markets connected to a Collector
+                        </a>
+                      </h6>
+                    </div>
+                    <div id="collapse_search_markets" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading_search_markets">
+                      <div class="panel-body">
+                        <!-- isi filter -->
+                        <div class="row">
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <div class="checkbox">
+                                <label>
+                                  <input type="checkbox"> By name or number
+                                </label>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <input type="text" class="form-control input-sm" placeholder="(enter name or click on map)">
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <div class="checkbox">
+                                <label>
+                                  <input type="checkbox"> All markets in sub-district
+                                </label>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <input type="text" class="form-control input-sm" placeholder="(enter name or click on map)">
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <div class="checkbox">
+                                <label>
+                                  <input type="checkbox"> All markets in district
+                                </label>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <input type="text" class="form-control input-sm" placeholder="(enter name or click on map)">
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-md-12">
+                            <div class="form-inline">
+                              <div class="form-group">
+                                <div class="checkbox">
+                                  <label>
+                                    <input type="checkbox"> Ayam Kampung
+                                  </label>
+                                </div>
+                              </div>
+                              <div class="form-group">
+                                <div class="checkbox">
+                                  <label>
+                                    <input type="checkbox"> Broiler
+                                  </label>
+                                </div>
+                              </div>
+                              <div class="form-group">
+                                <div class="checkbox">
+                                  <label>
+                                    <input type="checkbox"> Ducks
+                                  </label>
+                                </div>
+                              </div>
+                              <div class="form-group">
+                                <div class="checkbox">
+                                  <label>
+                                    <input type="checkbox"> Layer
+                                  </label>
+                                </div>
+                              </div>
+                              <div class="form-group">
+                                <div class="checkbox">
+                                  <label>
+                                    <input type="checkbox"> <b>ALL</b>
+                                  </label>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="panel panel-footer">
+                        <div class="form-group">
+                          <button class="btn btn-primary btn-block">Get Data!</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div> <!-- end of sub second panel / Search Markets connected to a Collector -->
+
+                </div> <!-- end of sub panel -->
+              </div>
+            </div>
+          </div> <!-- end of first panel -->
+
+          <!-- second panel -->
+          <div class="panel panel-success">
+            <div class="panel-heading" role="tab" id="heading_search_poultry">
+              <h6 class="panel-title">
+                <a role="button" class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapse_search_poultry" aria-expanded="false" aria-controls="collapse_search_poultry">
+                  Search Poultry District of Origin of Poultry in Jakarta
+                </a>
+              </h6>
+            </div>
+            <div id="collapse_search_poultry" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading_search_poultry">
+              <div class="panel-body">
+                <!-- sub panel -->
+                <div class="panel-group" id="sub_accordion_search_poultry" role="tablist" aria-multiselectable="true">
+                  <!-- sub first panel / Search Districts of poultry origin of Collectors -->
+                  <div class="panel panel-success">
+                    <div class="panel-heading" role="tab" id="heading_poultry_origin_of_collectors">
+                      <h6 class="panel-title">
+                        <a role="button" data-toggle="collapse" data-parent="#sub_accordion_search_poultry" href="#collapse_poultry_origin_of_collectors" aria-expanded="true" aria-controls="collapse_poultry_origin_of_collectors">
+                          Search Districts of poultry origin of Collectors
+                        </a>
+                      </h6>
+                    </div>
+                    <div id="collapse_poultry_origin_of_collectors" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading_poultry_origin_of_collectors">
+                      <div class="panel-body">
+                        <!-- isi filter -->
+                        <div class="row">
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <div class="checkbox">
+                                <label>
+                                  <input type="checkbox"> By name or number
+                                </label>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <input type="text" class="form-control input-sm" placeholder="(enter name or click on map)">
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <div class="checkbox">
+                                <label>
+                                  <input type="checkbox"> By sub-district
+                                </label>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <input type="text" class="form-control input-sm" placeholder="(enter name or click on map)">
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <div class="checkbox">
+                                <label>
+                                  <input type="checkbox"> By JABODETABEK district
+                                </label>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <input type="text" class="form-control input-sm" placeholder="(enter name or click on map)">
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-md-12">
+                            <div class="form-inline">
+                              <div class="form-group">
+                                <div class="checkbox">
+                                  <label>
+                                    <input type="checkbox"> Ayam Kampung
+                                  </label>
+                                </div>
+                              </div>
+                              <div class="form-group">
+                                <div class="checkbox">
+                                  <label>
+                                    <input type="checkbox"> Broiler
+                                  </label>
+                                </div>
+                              </div>
+                              <div class="form-group">
+                                <div class="checkbox">
+                                  <label>
+                                    <input type="checkbox"> Ducks
+                                  </label>
+                                </div>
+                              </div>
+                              <div class="form-group">
+                                <div class="checkbox">
+                                  <label>
+                                    <input type="checkbox"> Layer
+                                  </label>
+                                </div>
+                              </div>
+                              <div class="form-group">
+                                <div class="checkbox">
+                                  <label>
+                                    <input type="checkbox"> <b>ALL</b>
+                                  </label>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="panel panel-footer">
+                        <div class="form-group">
+                          <button class="btn btn-primary btn-block">Get Data!</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div> <!-- end of sub first panel / Search Districts of poultry origin of Collectors -->
+
+                  <!-- sub second panel / Search Districts of poultry origin of Livebird markets* -->
+                  <div class="panel panel-success">
+                    <div class="panel-heading" role="tab" id="heading_poultry_origin_of_livebirds_markets">
+                      <h6 class="panel-title">
+                        <a role="button" data-toggle="collapse" data-parent="#sub_accordion_search_poultry" href="#collapse_poultry_origin_of_livebirds_markets" aria-expanded="true" aria-controls="collapse_poultry_origin_of_livebirds_markets">
+                          Search Districts of poultry origin of Livebird markets*
+                        </a>
+                      </h6>
+                    </div>
+                    <div id="collapse_poultry_origin_of_livebirds_markets" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading_poultry_origin_of_livebirds_markets">
+                      <div class="panel-body">
+                        <!-- isi filter -->
+                        <div class="row">
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <div class="checkbox">
+                                <label>
+                                  <input type="checkbox"> By name or number
+                                </label>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <input type="text" class="form-control input-sm" placeholder="(enter name or click on map)">
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <div class="checkbox">
+                                <label>
+                                  <input type="checkbox"> By sub-district
+                                </label>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <input type="text" class="form-control input-sm" placeholder="(enter name or click on map)">
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <div class="checkbox">
+                                <label>
+                                  <input type="checkbox"> By district
+                                </label>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <input type="text" class="form-control input-sm" placeholder="(enter name or click on map)">
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-md-12">
+                            <div class="form-inline">
+                              <div class="form-group">
+                                <div class="checkbox">
+                                  <label>
+                                    <input type="checkbox"> Ayam Kampung
+                                  </label>
+                                </div>
+                              </div>
+                              <div class="form-group">
+                                <div class="checkbox">
+                                  <label>
+                                    <input type="checkbox"> Broiler
+                                  </label>
+                                </div>
+                              </div>
+                              <div class="form-group">
+                                <div class="checkbox">
+                                  <label>
+                                    <input type="checkbox"> Ducks
+                                  </label>
+                                </div>
+                              </div>
+                              <div class="form-group">
+                                <div class="checkbox">
+                                  <label>
+                                    <input type="checkbox"> Layer
+                                  </label>
+                                </div>
+                              </div>
+                              <div class="form-group">
+                                <div class="checkbox">
+                                  <label>
+                                    <input type="checkbox"> <b>ALL</b>
+                                  </label>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="panel panel-footer">
+                        <div class="form-group">
+                          <button class="btn btn-primary btn-block">Get Data!</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div> <!-- end of sub second panel / Search Districts of poultry origin of Livebird markets* -->
+
+                </div> <!-- end of sub panel -->
+                <div class="row">
+                  <div class="col-md-12">
+                    <i style="color:#8A6D3B">* ONLY FOR POULTRY CONNECTED TO COLLECTORS IN JABODETABEK</i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div> <!-- end of second panel -->
+
+          <!-- third panel -->
+          <div class="panel panel-default">
+            <div class="panel-heading" role="tab" id="heading_search_destination">
+              <h6 class="panel-title">
+                <a role="button" class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapse_search_destination" aria-expanded="false" aria-controls="collapse_search_destination">
+                  Search Destination of birds from a district
+                </a>
+              </h6>
+            </div>
+            <div id="collapse_search_destination" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading_search_destination">
+              <div class="panel-body">
+                <!-- sub panel -->
+                <div class="panel-group" id="sub_accordion_search_destination" role="tablist" aria-multiselectable="true">
+                  <!-- sub first panel / Search Districts of poultry origin of Collectors -->
+                  <div class="panel panel-default">
+                    <div class="panel-heading" role="tab" id="heading_birds_district_of_origin">
+                      <h6 class="panel-title">
+                        <a role="button" data-toggle="collapse" data-parent="#sub_accordion_search_destination" href="#collapse_birds_district_of_origin" aria-expanded="true" aria-controls="collapse_birds_district_of_origin">
+                          Search Destinations of birds district of origin
+                        </a>
+                      </h6>
+                    </div>
+                    <div id="collapse_birds_district_of_origin" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading_birds_district_of_origin">
+                      <div class="panel-body">
+                        <!-- isi filter -->
+                        <div class="row">
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <div class="checkbox">
+                                <label>
+                                  <input type="checkbox"> Display only LBM destination
+                                </label>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <input type="text" class="form-control input-sm" placeholder="Type district name or select on map">
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <div class="checkbox">
+                                <label>
+                                  <input type="checkbox"> Display only collector destinations
+                                </label>
+                              </div>
+                            </div>
+                          </div>
+                          <!-- <div class="col-md-6">
+                            <div class="form-group">
+                              <input type="text" class="form-control input-sm" placeholder="(enter name or click on map)">
+                            </div>
+                          </div> -->
+                        </div>
+                        <div class="row">
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <div class="checkbox">
+                                <label>
+                                  <input type="checkbox"> Display collector and LBM destination
+                                </label>
+                              </div>
+                            </div>
+                          </div>
+                          <!-- <div class="col-md-6">
+                            <div class="form-group">
+                              <input type="text" class="form-control input-sm" placeholder="(enter name or click on map)">
+                            </div>
+                          </div> -->
+                        </div>
+                        <div class="row">
+                          <div class="col-md-12">
+                            <div class="form-inline">
+                              <div class="form-group">
+                                <div class="checkbox">
+                                  <label>
+                                    <input type="checkbox"> Ayam Kampung
+                                  </label>
+                                </div>
+                              </div>
+                              <div class="form-group">
+                                <div class="checkbox">
+                                  <label>
+                                    <input type="checkbox"> Broiler
+                                  </label>
+                                </div>
+                              </div>
+                              <div class="form-group">
+                                <div class="checkbox">
+                                  <label>
+                                    <input type="checkbox"> Ducks
+                                  </label>
+                                </div>
+                              </div>
+                              <div class="form-group">
+                                <div class="checkbox">
+                                  <label>
+                                    <input type="checkbox"> Layer
+                                  </label>
+                                </div>
+                              </div>
+                              <div class="form-group">
+                                <div class="checkbox">
+                                  <label>
+                                    <input type="checkbox"> <b>ALL</b>
+                                  </label>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="panel panel-footer">
+                        <div class="form-group">
+                          <button class="btn btn-primary btn-block">Get Data!</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div> <!-- end of sub first panel / Search Districts of poultry origin of Collectors -->
+
+                </div> <!-- end of sub panel -->
+              </div>
+            </div>
+          </div> <!-- end of third panel -->
+
+        </div> <!-- end of panel -->
+      </div>  <!-- end of filter -->
+
+    </div><!-- end of Content/Body -->
+
+  </div>
+
+
     <div id="tooltip" class="hidden">
         <p><strong><span id="daerah"></span></strong></p>
         <p id="info">Additional Information for selected area can be showed here</p>
