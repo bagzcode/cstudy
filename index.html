@@ -4245,16 +4245,16 @@
         function CheckDestinationFilter()
         {
             destinationmenu[0] = "District"
-            if($('#cbf3a1').prop("checked") == true )
+            if($('#cbf3a2').prop("checked") == true )
             {
                 destinationmenu[1] = "SubDistrict";
             }
             
-            if($('#cbf3a2').prop("checked") == true && $('#cbf3a1').prop("checked") == true)
+            if($('#cbf3a1').prop("checked") == true && $('#cbf3a2').prop("checked") == true)
             {
                 destinationmenu[2] = "LBM";
             }
-            else if($('#cbf3a2').prop("checked") == true && $('#cbf3a1').prop("checked") == false)
+            else if($('#cbf3a1').prop("checked") == true && $('#cbf3a2').prop("checked") == false)
             {
                 destinationmenu[1] = "LBM";
             }
