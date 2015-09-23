@@ -1,5 +1,6 @@
 body {
-  background-color: #faf5df;
+  background-color: #ffffff;
+  font-size:12px;
 }
 text {
   font-size: 12px;
@@ -191,4 +192,29 @@ th {
 
 #gjkt_rect.hidden, #gjw_rect.hidden, #gjktFS_rect.hidden{
         display: none;
+}
+
+.panel{
+  border-radius: 0px;
+}
+
+.panel-group .panel{
+  border-radius: 0px;
+}
+
+.panel-heading {
+  border-top-left-radius: 0px;
+  border-top-right-radius: 0px;
+}
+
+.panel-title{
+  font-size:12px;
+}
+
+.form-control{
+  font-size:12px;
+}
+
+.panel-footer .form-group{
+  margin-bottom: 0px;
 }
