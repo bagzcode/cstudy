@@ -3982,7 +3982,12 @@
         d3.select("#gjw_rect").classed("hidden", true);
         //d3.select("#gjktFS_rect").classed("hidden", true);
         
-        destinationmenu[0] = "District"
+        destinationmenu[0] = "District";
+        $('.CBALL').prop('checked', true);
+        $('.AK').prop('checked', true);
+        $('.BR').prop('checked', true);
+        $('.DU').prop('checked', true);
+        $('.LA').prop('checked', true);
 
 
 /****************************************************************************************/
@@ -3993,9 +3998,11 @@
             canvas.selectAll("line").remove();
             map.selectAll("circle").remove();
             map.selectAll("path").remove();
-            d3.select("#gjw_rect").classed("hidden", true);
             map2.selectAll("circle").remove();
             map2.selectAll("path").remove();
+            map3.selectAll("circle").remove();
+            map3.selectAll("path").remove();
+            d3.select("#gjw_rect").classed("hidden", true);
             d3.select("#gjktFS_rect").classed("hidden", false);
 
             //added Full jabodetabek map
@@ -4009,6 +4016,10 @@
         { /* perform action here */ 
             d3.select("#gjktFS_rect").classed("hidden", true);
             canvas.selectAll("line").remove();
+            map.selectAll("circle").remove();
+            map.selectAll("path").remove();
+            map2.selectAll("circle").remove();
+            map2.selectAll("path").remove();
             map3.selectAll("circle").remove();
             map3.selectAll("path").remove();
             d3.select("#gjkt_rect").classed("hidden", false);
@@ -4032,6 +4043,10 @@
         { /* perform action here */ 
             d3.select("#gjktFS_rect").classed("hidden", true);
             canvas.selectAll("line").remove();
+            map.selectAll("circle").remove();
+            map.selectAll("path").remove();
+            map2.selectAll("circle").remove();
+            map2.selectAll("path").remove();
             map3.selectAll("circle").remove();
             map3.selectAll("path").remove();
             d3.select("#gjkt_rect").classed("hidden", false);
